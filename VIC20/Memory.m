@@ -20,6 +20,11 @@
     return self;
 }
     
+- (id) initWithContentsOfFile:(NSString *)file
+{
+    return self;
+}
+    
 - (void) write: (uint16)address loc: (uint8)data
 {
         
