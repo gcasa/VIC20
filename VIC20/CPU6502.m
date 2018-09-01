@@ -9,4 +9,39 @@
 #import "CPU6502.h"
 
 @implementation CPU6502
+
+- (void) reset
+{
+    
+}
+- (void) interrupt
+{
+    
+}
+
+- (void) fetch
+{
+    
+}
+
+- (void) execute
+{
+    
+}
+
+- (void) step
+{
+    
+}
+
+- (void) state
+{
+    
+}
+
+- (void) tick
+{
+    
+}
+
 @end

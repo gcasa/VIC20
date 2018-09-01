@@ -12,12 +12,12 @@
 
 - (id) initWithSize: (uint16)size
 {
-        
+    return self;
 }
     
 - (id) initWithData: (NSData *)data
 {
-    
+    return self;
 }
     
 - (void) write: (uint16)address loc: (uint8)data
@@ -27,6 +27,7 @@
 
 - (uint8) read: (uint16)address
 {
-        
+    return 0;
 }
+
 @end
