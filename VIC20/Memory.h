@@ -1,0 +1,21 @@
+//
+//  Memory.h
+//  VIC20
+//
+//  Created by Gregory Casamento on 8/31/18.
+//  Copyright © 2018 Open Logic. All rights reserved.
+//
+
+#import <Foundation/Foundation.h>
+
+@interface Memory : NSObject
+{
+    uint8 *memory;
+}
+    
+- (id) initWithSize: (uint16)size;
+- (id) initWithData: (NSData *)data;
+- (id) initWithContentsOfFile: (NSString *)file;
+- (void) write: (uint16)address loc: (uint8)data;
+- (uint8) read: (uint16)address;
+@end
