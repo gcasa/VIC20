@@ -72,6 +72,8 @@
 		14B271742136071100E9588E /* VIC20 */ = {
 			isa = PBXGroup;
 			children = (
+				14B7195B21F4368F00C72FFB /* Processor */,
+				14B7195A21F4367800C72FFB /* RAM */,
 				14B271752136071100E9588E /* AppDelegate.h */,
 				14B271762136071200E9588E /* AppDelegate.m */,
 				14B271782136071400E9588E /* Assets.xcassets */,
@@ -79,20 +81,34 @@
 				14B2717D2136071400E9588E /* Info.plist */,
 				14B2717E2136071400E9588E /* main.m */,
 				14B271802136071400E9588E /* VIC20.entitlements */,
-				14B2718F21360CFE00E9588E /* VIC6561.h */,
-				14B2719021360CFE00E9588E /* VIC6561.m */,
-				14B2718C21360CBB00E9588E /* CPU6502.h */,
-				14B2718D21360CBB00E9588E /* CPU6502.m */,
+			);
+			path = VIC20;
+			sourceTree = "<group>";
+		};
+		14B7195A21F4367800C72FFB /* RAM */ = {
+			isa = PBXGroup;
+			children = (
+				14B27198213A1AEF00E9588E /* Memory.h */,
+				14B2719B213A1B9E00E9588E /* Memory.m */,
 				14B27192213A1A8F00E9588E /* RAM.h */,
 				14B27193213A1A8F00E9588E /* RAM.m */,
 				14B27195213A1ACE00E9588E /* ROM.h */,
 				14B27196213A1ACE00E9588E /* ROM.m */,
-				14B27198213A1AEF00E9588E /* Memory.h */,
-				14B2719B213A1B9E00E9588E /* Memory.m */,
+			);
+			path = RAM;
+			sourceTree = "<group>";
+		};
+		14B7195B21F4368F00C72FFB /* Processor */ = {
+			isa = PBXGroup;
+			children = (
+				14B2718F21360CFE00E9588E /* VIC6561.h */,
+				14B2719021360CFE00E9588E /* VIC6561.m */,
+				14B2718C21360CBB00E9588E /* CPU6502.h */,
+				14B2718D21360CBB00E9588E /* CPU6502.m */,
 				14B2719D213A373100E9588E /* Instruction.h */,
 				14B2719E213A373100E9588E /* Instruction.m */,
 			);
-			path = VIC20;
+			path = Processor;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
