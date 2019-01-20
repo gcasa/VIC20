@@ -23,32 +23,37 @@
 {
     if([self initWithSize:[data length]] != nil)
     {
-        
+        [self write: data atLocation: 0];
     }
     return self;
 }
     
 - (id) initWithContentsOfFile:(NSString *)file
 {
+    NSData *dataForFile = [[NSData alloc] initWithContentsOfFile:file];
+    if((self = [self initWithData:dataForFile]) != nil)
+    {
+        // load the file into memory...
+    }
     return self;
 }
     
-- (void) write: (uint16)data loc: (uint8)loc
+- (void) write: (uint8)data loc: (uint16)loc
 {
-        
+    memory[loc] = data;
 }
 
 - (uint8) read: (uint16)address
 {
-    return 0;
+    return memory[address];
 }
 
-- (void) write: (NSData *)data
+- (void) write: (NSData *)data atLocation: (uint16)loc
 {
     
 }
 
-- (NSData *)readAtLocation: (uint8)loc length: (uint8)len
+- (NSData *)readAtLocation: (uint16)loc length: (uint16)len
 {
     
 }
