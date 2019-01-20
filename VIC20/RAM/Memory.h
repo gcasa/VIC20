@@ -13,7 +13,7 @@
     uint8 *memory;
 }
     
-- (id) initWithSize: (uint16)size;
+- (id) initWithSize: (NSUInteger)size;
 - (id) initWithData: (NSData *)data;
 - (id) initWithContentsOfFile: (NSString *)file;
 - (void) write: (uint8)data loc: (uint16)loc;

@@ -8,6 +8,8 @@
 
 #import <Foundation/Foundation.h>
 
+@class RAM, ROM;
+
 #define ZEROPAGE    0x0000  // 0x0000 - 0x00FF
 #define STACKBASE   0x0100  // 0x0100 - 0x01FF
 #define RESETVECTOR 0xFFFC  // 0xFFFC - 0xFFFD
@@ -21,6 +23,8 @@
     uint16 PC;
     uint8 P;
     uint8 SP;
+    
+    RAM *ram;
 }
 
 - (void) reset;

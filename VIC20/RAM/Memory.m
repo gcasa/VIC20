@@ -10,7 +10,7 @@
 
 @implementation Memory
 
-- (id) initWithSize: (uint16)size
+- (id) initWithSize: (NSUInteger)size
 {
     if((self = [super init]) != nil)
     {
