@@ -16,7 +16,6 @@
 		14B27194213A1A8F00E9588E /* RAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27193213A1A8F00E9588E /* RAM.m */; };
 		14B27197213A1ACE00E9588E /* ROM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27196213A1ACE00E9588E /* ROM.m */; };
 		14B2719C213A1B9E00E9588E /* Memory.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719B213A1B9E00E9588E /* Memory.m */; };
-		14B2719F213A373100E9588E /* Instruction.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719E213A373100E9588E /* Instruction.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -38,8 +37,6 @@
 		14B27196213A1ACE00E9588E /* ROM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ROM.m; sourceTree = "<group>"; };
 		14B27198213A1AEF00E9588E /* Memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
 		14B2719B213A1B9E00E9588E /* Memory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Memory.m; sourceTree = "<group>"; };
-		14B2719D213A373100E9588E /* Instruction.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Instruction.h; sourceTree = "<group>"; };
-		14B2719E213A373100E9588E /* Instruction.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Instruction.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -105,8 +102,6 @@
 				14B2719021360CFE00E9588E /* VIC6561.m */,
 				14B2718C21360CBB00E9588E /* CPU6502.h */,
 				14B2718D21360CBB00E9588E /* CPU6502.m */,
-				14B2719D213A373100E9588E /* Instruction.h */,
-				14B2719E213A373100E9588E /* Instruction.m */,
 			);
 			path = Processor;
 			sourceTree = "<group>";
@@ -182,7 +177,6 @@
 			files = (
 				14B27197213A1ACE00E9588E /* ROM.m in Sources */,
 				14B2719121360CFE00E9588E /* VIC6561.m in Sources */,
-				14B2719F213A373100E9588E /* Instruction.m in Sources */,
 				14B2717F2136071400E9588E /* main.m in Sources */,
 				14B271772136071200E9588E /* AppDelegate.m in Sources */,
 				14B27194213A1A8F00E9588E /* RAM.m in Sources */,

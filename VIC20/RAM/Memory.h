@@ -16,7 +16,8 @@
 - (id) initWithSize: (uint16)size;
 - (id) initWithData: (NSData *)data;
 - (id) initWithContentsOfFile: (NSString *)file;
-- (void) write: (uint16)data loc: (uint8)address;
+- (void) write: (uint16)data loc: (uint8)loc
 - (uint8) read: (uint16)address;
 - (void) write: (NSData *)data
+- (NSData *) readAtLocation: (uint8)loc length: (uint8)len;
 @end
