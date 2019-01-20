@@ -10,4 +10,9 @@
 
 @implementation ROM
 
+- (void) write: (NSData *)data atLocation: (uint16)loc
+{
+    NSLog(@"Writing to read only memory");
+}
+
 @end

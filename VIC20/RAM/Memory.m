@@ -50,12 +50,19 @@
 
 - (void) write: (NSData *)data atLocation: (uint16)loc
 {
-    
+    uint8 *bytes = (uint8 *)[data bytes];
+    uint16 i = 0, k = 0;
+    for(i = loc; i < ([data length] + loc); i++)
+    {
+        memory[i] = bytes[k];
+        k++;
+    }
 }
 
 - (NSData *)readAtLocation: (uint16)loc length: (uint16)len
 {
-    
+    NSData *data = [[NSData alloc] initWithBytes:memory length:len];
+    return data;
 }
 
 @end
