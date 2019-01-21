@@ -15,8 +15,6 @@
 #define RESETVECTOR 0xFFFC  // 0xFFFC - 0xFFFD
 #define IRQVECTOR   0xFFFE  // 0xFFFE - 0xFFFF
 
-static NSDictionary *instructionMap;
-
 @interface CPU6502 : NSObject
 {
     // Registers...

@@ -12,13 +12,35 @@
 
 @implementation CPU6502
 
-+ (NSDictionary *)buildDictForInstruction: (NSNumber *)opcode
-                                     name: (NSString *)name
-                                paramters: (NSNumber *)parameters
-                                   cycles: (NSNumber *)cycles
-                                   method: (NSString *)methodName
+/*
+ HI    LO-NIBBLE
+       00          01          02     03     04        05         06         07   08       09         0A       0B   0C        0D          0E         0F
+ 00    BRK impl    ORA X,ind   ---    ---    ---       ORA zpg    ASL zpg    ---  PHP impl ORA #      ASL A    ---  ---       ORA abs     ASL abs    ---
+ 10    BPL rel     ORA ind,Y   ---    ---    ---       ORA zpg,X  ASL zpg,X  ---  CLC impl ORA abs,Y  ---      ---  ---       ORA abs,X   ASL abs,X  ---
+ 20    JSR abs     AND X,ind   ---    ---    BIT zpg   AND zpg    ROL zpg    ---  PLP impl AND #      ROL A    ---  BIT abs   AND abs     ROL abs    ---
+ 30    BMI rel     AND ind,Y   ---    ---    ---       AND zpg,X  ROL zpg,X  ---  SEC impl AND abs,Y  ---      ---  ---       AND abs,X   ROL abs,X  ---
+ 40    RTI impl    EOR X,ind   ---    ---    ---       EOR zpg    LSR zpg    ---  PHA impl EOR #      LSR A    ---  JMP abs   EOR abs     LSR abs    ---
+ 50    BVC rel     EOR ind,Y   ---    ---    ---       EOR zpg,X  LSR zpg,X  ---  CLI impl EOR abs,Y  ---      ---  ---       EOR abs,X   LSR abs,X  ---
+ 60    RTS impl    ADC X,ind   ---    ---    ---       ADC zpg    ROR zpg    ---  PLA impl ADC #      ROR A    ---  JMP ind   ADC abs     ROR abs    ---
+ 70    BVS rel     ADC ind,Y   ---    ---    ---       ADC zpg,X  ROR zpg,X  ---  SEI impl ADC abs,Y  ---      ---  ---       ADC abs,X   ROR abs,X  ---
+ 80    ---         STA X,ind   ---    ---    STY zpg   STA zpg    STX zpg    ---  DEY impl ---        TXA impl ---  STY abs   STA abs     STX abs    ---
+ 90    BCC rel     STA ind,Y   ---    ---    STY zpg,X STA zpg,X  STX zpg,Y  ---  TYA impl STA abs,Y  TXS impl ---  ---       STA abs,X   ---        ---
+ A0    LDY #       LDA X,ind   LDX #  ---    LDY zpg   LDA zpg    LDX zpg    ---  TAY impl LDA #      TAX impl ---  LDY abs   LDA abs     LDX abs    ---
+ B0    BCS rel     LDA ind,Y   ---    ---    LDY zpg,X LDA zpg,X  LDX zpg,Y  ---  CLV impl LDA abs,Y  TSX impl ---  LDY abs,X LDA abs,X   LDX abs,Y  ---
+ C0    CPY #       CMP X,ind   ---    ---    CPY zpg   CMP zpg    DEC zpg    ---  INY impl CMP #      DEX impl ---  CPY abs   CMP abs     DEC abs    ---
+ D0    BNE rel     CMP ind,Y   ---    ---    ---       CMP zpg,X  DEC zpg,X  ---  CLD impl CMP abs,Y  ---      ---  ---       CMP abs,X   DEC abs,X  ---
+ E0    CPX #       SBC X,ind   ---    ---    CPX zpg   SBC zpg    INC zpg    ---  INX impl SBC #      NOP impl ---  CPX abs   SBC abs     INC abs    ---
+ F0    BEQ rel     SBC ind,Y   ---    ---    ---       SBC zpg,X  INC zpg,X  ---  SED impl SBC abs,Y  ---      ---  ---       SBC abs,X   INC abs,X  ---
+ */
+
+static NSMutableDictionary *instructionMap;
+
++ (NSDictionary *)buildDictForInstructionName: (NSString *)name
+                                    paramters: (NSNumber *)parameters
+                                       cycles: (NSNumber *)cycles
+                                       method: (NSString *)methodName
 {
-    NSDictionary *insDict = [NSDictionary dictionaryWithObjectsAndKeys:@"opcpde", opcode,
+    NSDictionary *insDict = [NSDictionary dictionaryWithObjectsAndKeys:
                              @"name", name,
                              @"paramters", parameters,
                              @"cycles", cycles,
@@ -26,14 +48,55 @@
     return insDict;
 }
 
++ (void) addOpcode: (NSInteger)op
+              name: (NSString *)name
+            params: (NSInteger)par
+            cycles: (NSInteger)cycles
+            method: (NSString *)method
+{
+    NSDictionary *dict = [self buildDictForInstructionName:name
+                                                 paramters:[NSNumber numberWithInteger:par]
+                                                    cycles:[NSNumber numberWithInteger:cycles]
+                                                    method:method];
+    [instructionMap setObject: dict forKey:[NSNumber numberWithInteger:op]];
+}
+
 + (void) buildInstructionMap
 {
+    instructionMap = [NSMutableDictionary dictionary];
+    // BRK
+    [self addOpcode:0x00 name:@"BRK" params:1 cycles:7 method:@"BRK_implied"];
     
+    /*
+     ORA  OR Memory with Accumulator
+     
+     A OR M -> A                      N Z C I D V
+                                      + + - - - -
+     
+     addressing    assembler    opc  bytes  cyles
+     --------------------------------------------
+     immidiate     ORA #oper     09    2     2
+     zeropage      ORA oper      05    2     3
+     zeropage,X    ORA oper,X    15    2     4
+     absolute      ORA oper      0D    3     4
+     absolute,X    ORA oper,X    1D    3     4*
+     absolute,Y    ORA oper,Y    19    3     4*
+     (indirect,X)  ORA (oper,X)  01    2     6
+     (indirect),Y  ORA (oper),Y  11    2     5*
+     */
+    [self addOpcode:0x09 name:@"ORA" params:1 cycles:2 method:@"ORA_immediate"];
+    [self addOpcode:0x05 name:@"ORA" params:1 cycles:3 method:@"ORA_zeropage"];
+    [self addOpcode:0x15 name:@"ORA" params:1 cycles:4 method:@"ORA_zeropageX"];
+    [self addOpcode:0x0D name:@"ORA" params:1 cycles:4 method:@"ORA_absolute"];
+    [self addOpcode:0x1D name:@"ORA" params:1 cycles:4 method:@"ORA_absoluteX"];
+    [self addOpcode:0x19 name:@"ORA" params:1 cycles:4 method:@"ORA_absoluteY"];
+    [self addOpcode:0x01 name:@"ORA" params:1 cycles:6 method:@"ORA_indirectX"];
+    [self addOpcode:0x11 name:@"ORA" params:1 cycles:5 method:@"ORA_indirectY"];
+
 }
 
 + (void) initialize
 {
-    instructionMap = [NSDictionary dictionary];
     [self buildInstructionMap];
 }
 
