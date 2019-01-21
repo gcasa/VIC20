@@ -65,6 +65,32 @@ static NSMutableDictionary *instructionMap;
 {
     instructionMap = [NSMutableDictionary dictionary];
     /*
+    ADC  Add Memory to Accumulator with Carry
+    
+    A + M + C -> A, C                N Z C I D V
+    + + + - - +
+    
+    addressing    assembler    opc  bytes  cyles
+    --------------------------------------------
+    immidiate     ADC #oper     69    2     2
+    zeropage      ADC oper      65    2     3
+    zeropage,X    ADC oper,X    75    2     4
+    absolute      ADC oper      6D    3     4
+    absolute,X    ADC oper,X    7D    3     4*
+    absolute,Y    ADC oper,Y    79    3     4*
+    (indirect,X)  ADC (oper,X)  61    2     6
+    (indirect),Y  ADC (oper),Y  71    2     5*
+    */
+    [self addOpcode:0x69 name:@"ADC" params:1 cycles:7 method:@"ADC_immediate"];
+    [self addOpcode:0x65 name:@"ADC" params:1 cycles:7 method:@"ADC_zeropage"];
+    [self addOpcode:0x75 name:@"ADC" params:1 cycles:7 method:@"ADC_zeropageX"];
+    [self addOpcode:0x6d name:@"ADC" params:1 cycles:7 method:@"ADC_absolute"];
+    [self addOpcode:0x7d name:@"ADC" params:1 cycles:7 method:@"ADC_absoluteX"];
+    [self addOpcode:0x79 name:@"ADC" params:1 cycles:7 method:@"ADC_absoluteY"];
+    [self addOpcode:0x61 name:@"ADC" params:1 cycles:7 method:@"ADC_indirectX"];
+    [self addOpcode:0x71 name:@"ADC" params:1 cycles:7 method:@"ADC_indirectY"];
+
+    /*
      BRK  Force Break
      
      interrupt,                       N Z C I D V
