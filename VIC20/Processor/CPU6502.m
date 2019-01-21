@@ -68,7 +68,7 @@ static NSMutableDictionary *instructionMap;
     ADC  Add Memory to Accumulator with Carry
     
     A + M + C -> A, C                N Z C I D V
-    + + + - - +
+                                     + + + - - +
     
     addressing    assembler    opc  bytes  cyles
     --------------------------------------------
@@ -94,7 +94,7 @@ static NSMutableDictionary *instructionMap;
      AND  AND Memory with Accumulator
      
      A AND M -> A                     N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -115,6 +115,50 @@ static NSMutableDictionary *instructionMap;
     [self addOpcode:0x39 name:@"AND" params:1 cycles:7 method:@"AND_absoluteY"];
     [self addOpcode:0x21 name:@"AND" params:1 cycles:7 method:@"AND_indirectX"];
     [self addOpcode:0x31 name:@"AND" params:1 cycles:7 method:@"AND_indirectY"];
+    
+    /*
+     ASL  Shift Left One Bit (Memory or Accumulator)
+     
+     C <- [76543210] <- 0             N Z C I D V
+                                      + + + - - -
+     
+     addressing    assembler    opc  bytes  cyles
+     --------------------------------------------
+     accumulator   ASL A         0A    1     2
+     zeropage      ASL oper      06    2     5
+     zeropage,X    ASL oper,X    16    2     6
+     absolute      ASL oper      0E    3     6
+     absolute,X    ASL oper,X    1E    3     7
+     */
+    [self addOpcode:0x29 name:@"ASL" params:1 cycles:7 method:@"ASL_accumulator"];
+    [self addOpcode:0x25 name:@"ASL" params:1 cycles:7 method:@"ASL_zeropage"];
+    [self addOpcode:0x35 name:@"ASL" params:1 cycles:7 method:@"ASL_zeropageX"];
+    [self addOpcode:0x2d name:@"ASL" params:1 cycles:7 method:@"ASL_absolute"];
+    [self addOpcode:0x3d name:@"ASL" params:1 cycles:7 method:@"ASL_absoluteX"];
+    
+    /*
+     BCC  Branch on Carry Clear
+     
+     branch on C = 0                  N Z C I D V
+                                      - - - - - -
+     
+     addressing    assembler    opc  bytes  cyles
+     --------------------------------------------
+     relative      BCC oper      90    2     2**
+     */
+    [self addOpcode:0x90 name:@"BCC" params:1 cycles:7 method:@"BCC_relative"];
+    
+    /*
+     BCS  Branch on Carry Set
+     
+     branch on C = 1                  N Z C I D V
+                                      - - - - - -
+     
+     addressing    assembler    opc  bytes  cyles
+     --------------------------------------------
+     relative      BCS oper      B0    2     2**
+     */
+    [self addOpcode:0xb0 name:@"BCS" params:1 cycles:7 method:@"BCS_relative"];
     
     /*
      BRK  Force Break
