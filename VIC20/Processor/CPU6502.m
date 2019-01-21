@@ -89,7 +89,33 @@ static NSMutableDictionary *instructionMap;
     [self addOpcode:0x79 name:@"ADC" params:1 cycles:7 method:@"ADC_absoluteY"];
     [self addOpcode:0x61 name:@"ADC" params:1 cycles:7 method:@"ADC_indirectX"];
     [self addOpcode:0x71 name:@"ADC" params:1 cycles:7 method:@"ADC_indirectY"];
-
+    
+    /*
+     AND  AND Memory with Accumulator
+     
+     A AND M -> A                     N Z C I D V
+     + + - - - -
+     
+     addressing    assembler    opc  bytes  cyles
+     --------------------------------------------
+     immidiate     AND #oper     29    2     2
+     zeropage      AND oper      25    2     3
+     zeropage,X    AND oper,X    35    2     4
+     absolute      AND oper      2D    3     4
+     absolute,X    AND oper,X    3D    3     4*
+     absolute,Y    AND oper,Y    39    3     4*
+     (indirect,X)  AND (oper,X)  21    2     6
+     (indirect),Y  AND (oper),Y  31    2     5*
+     */
+    [self addOpcode:0x29 name:@"AND" params:1 cycles:7 method:@"AND_immediate"];
+    [self addOpcode:0x25 name:@"AND" params:1 cycles:7 method:@"AND_zeropage"];
+    [self addOpcode:0x35 name:@"AND" params:1 cycles:7 method:@"AND_zeropageX"];
+    [self addOpcode:0x2d name:@"AND" params:1 cycles:7 method:@"AND_absolute"];
+    [self addOpcode:0x3d name:@"AND" params:1 cycles:7 method:@"AND_absoluteX"];
+    [self addOpcode:0x39 name:@"AND" params:1 cycles:7 method:@"AND_absoluteY"];
+    [self addOpcode:0x21 name:@"AND" params:1 cycles:7 method:@"AND_indirectX"];
+    [self addOpcode:0x31 name:@"AND" params:1 cycles:7 method:@"AND_indirectY"];
+    
     /*
      BRK  Force Break
      
