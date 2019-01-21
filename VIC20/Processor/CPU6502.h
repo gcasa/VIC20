@@ -15,17 +15,35 @@
 #define RESETVECTOR 0xFFFC  // 0xFFFC - 0xFFFD
 #define IRQVECTOR   0xFFFE  // 0xFFFE - 0xFFFF
 
+static NSDictionary *instructionMap;
+
 @interface CPU6502 : NSObject
 {
-    uint8 A;
-    uint8 X;
-    uint8 Y;
-    uint16 PC;
-    uint8 P;
-    uint8 SP;
+    // Registers...
+    uint8 a;
+    uint8 x;
+    uint8 y;
+    uint16 pc;
+    uint8 p;
+    uint8 sp;
+    uint8 sr;
     
+    // Flags...
+    BOOL s;
+    BOOL v;
+    BOOL b;
+    BOOL d;
+    BOOL i;
+    BOOL z;
+    BOOL c;
+    
+
+    
+    // Memory...
     RAM *ram;
 }
+
+- (id) initWithSize: (NSUInteger)size;
 
 - (void) reset;
 - (void) interrupt;

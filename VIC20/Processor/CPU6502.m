@@ -12,29 +12,59 @@
 
 @implementation CPU6502
 
-- (id) init
++ (NSDictionary *)buildDictForInstruction: (NSNumber *)opcode
+                                     name: (NSString *)name
+                                paramters: (NSNumber *)parameters
+                                   cycles: (NSNumber *)cycles
+                                   method: (NSString *)methodName
+{
+    NSDictionary *insDict = [NSDictionary dictionaryWithObjectsAndKeys:@"opcpde", opcode,
+                             @"name", name,
+                             @"paramters", parameters,
+                             @"cycles", cycles,
+                             @"methodName", methodName, nil];
+    return insDict;
+}
+
++ (void) buildInstructionMap
+{
+    
+}
+
++ (void) initialize
+{
+    instructionMap = [NSDictionary dictionary];
+    [self buildInstructionMap];
+}
+
+- (id) initWithSize: (NSUInteger)size
 {
     if (([super init]) != nil)
     {
-        A = 0;
-        X = 0;
-        Y = 0;
-        PC = 0;
-        P = 0;
-        SP  = 0;
-        ram = [[RAM alloc] initWithSize: 64*1024];
+        [self reset];
+        ram = [[RAM alloc] initWithSize: size];
     }
     return nil;
 }
 
 - (void) reset
 {
-    A = 0;
-    X = 0;
-    Y = 0;
-    PC = 0;
-    P = 0;
-    SP  = 0;
+    // Initialize registers...
+    a  = 0x00;
+    x  = 0x00;
+    y  = 0x00;
+    pc = 0x00;
+    p  = 0x00;
+    sp = 0x00;
+    sr = 0xFF;
+    
+    // Initialize flags...
+    s  = 0x00;
+    b  = 0x00;
+    d  = 0x00;
+    i  = 0x00;
+    z  = 0x00;
+    c  = 0x00;
 }
 
 - (void) interrupt
@@ -59,12 +89,20 @@
 
 - (void) state
 {
-    NSLog(@"A = %08x, X = %08x, Y = %08x, PC = %08x, P = %08x, SP = %08x", A, X, Y, PC, P, SP);
+    NSLog(@"A = %08x, X = %08x, Y = %08x, PC = %08x, P = %08x, SP = %08x", a, x, y, pc, p, sp);
 }
 
 - (void) tick
 {
     
 }
+
+// Instruction interpretation....
+- (void) executeOperation: (uint8)operation
+{
+    
+}
+
+
 
 @end
