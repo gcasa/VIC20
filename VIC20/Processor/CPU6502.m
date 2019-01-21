@@ -64,7 +64,16 @@ static NSMutableDictionary *instructionMap;
 + (void) buildInstructionMap
 {
     instructionMap = [NSMutableDictionary dictionary];
-    // BRK
+    /*
+     BRK  Force Break
+     
+     interrupt,                       N Z C I D V
+     push PC+2, push SR               - - - 1 - -
+     
+     addressing    assembler    opc  bytes  cyles
+     --------------------------------------------
+     implied       BRK           00    1     7
+     */
     [self addOpcode:0x00 name:@"BRK" params:1 cycles:7 method:@"BRK_implied"];
     
     /*
