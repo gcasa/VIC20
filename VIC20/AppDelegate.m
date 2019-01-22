@@ -21,7 +21,7 @@
     NSString *pathForResource = [[NSBundle mainBundle] pathForResource:@"temp" ofType:@"img"];
     cpu = [[CPU6502 alloc] initWithSize: 64*1024];
     [cpu loadProgramFile: pathForResource atLocation: 1000];
-    [cpu executeAtLocation: 1000];
+    [cpu runAtLocation: 1000];
 }
 
 

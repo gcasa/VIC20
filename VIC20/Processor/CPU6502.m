@@ -573,7 +573,7 @@ static NSString *methodsString;
      --------------------------------------------
      absolute      JSR oper      20    3     6
      */
-    [self addOpcode:0x20 name:@"JSP" params:1 cycles:2 method:@"JSR_absolute"];
+    [self addOpcode:0x20 name:@"JSR" params:3 cycles:6 method:@"JSR_absolute"];
     
     /*
      LDA  Load Accumulator with Memory
@@ -1001,7 +1001,7 @@ static NSString *methodsString;
      */
     [self addOpcode:0x98 name:@"TYA" params:1 cycles:2 method:@"TYA_implied"];
 
-    // [self generateMethods];  /* Used to generate the method calls for each instruction */
+    [self generateMethods];  /* Used to generate the method calls for each instruction */
     NSLog(@"####### Finished initializing CPU");
 }
 
@@ -1054,10 +1054,7 @@ static NSString *methodsString;
 - (void) execute
 {
     [self fetch];
-    NSString *methodName = [[instructionMap objectForKey:currentInstruction] objectForKey: @"methodName"];
-    // NSLog(@"methodName = %@",methodName);
-    SEL selector = NSSelectorFromString(methodName);
-    [self performSelector:selector];
+    [self executeOperation: currentInstruction];
 }
 
 - (void) executeAtLocation: (uint16)loc
@@ -1069,6 +1066,22 @@ static NSString *methodsString;
 - (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc
 {
     [ram loadProgramFile:fileName atLocation:loc];
+}
+
+- (void) runAtLocation: (uint16)loc
+{
+    // return;
+    pc = loc;
+    [self fetch];
+    while([currentInstruction integerValue] != 0x00)
+    {
+        [self execute];
+    }
+}
+
+- (void) run
+{
+    [self runAtLocation:0];
 }
 
 - (void) step
@@ -1087,9 +1100,13 @@ static NSString *methodsString;
 }
 
 // Instruction interpretation....
-- (void) executeOperation: (uint8)operation
+- (void) executeOperation: (NSNumber *)operation
 {
-    
+    NSString *methodName = [[instructionMap objectForKey:operation] objectForKey: @"methodName"];
+    // NSLog(@"methodName = %@",methodName);
+    SEL selector = NSSelectorFromString(methodName);
+    [self performSelector:selector];
+    [self step];
 }
 
 // Instruction implementations...
@@ -1783,10 +1800,16 @@ static NSString *methodsString;
     NSLog(@"JMP");
 }
 
-/* Implementation of JSP */
+/* Implementation of JSR */
 - (void) JSR_absolute
 {
-    NSLog(@"JSP");
+    NSLog(@"JSR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
 }
 
 /* Implementation of LDA */
