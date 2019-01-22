@@ -63,6 +63,22 @@ static NSMutableDictionary *instructionMap;
 
 + (void) buildInstructionMap
 {
+    /* DOCS TAKEN FROM: https://www.masswerk.at/6502/6502_instruction_set.html */
+    /*
+     *  add 1 to cycles if page boundery is crossed
+     
+     ** add 1 to cycles if branch occurs on same page
+     add 2 to cycles if branch occurs to different page
+     
+     
+     Legend to Flags:  + .... modified
+                       - .... not modified
+                       1 .... set
+                       0 .... cleared
+                      M6 .... memory bit 6
+                      M7 .... memory bit 7
+     */
+    
     instructionMap = [NSMutableDictionary dictionary];
     /*
     ADC  Add Memory to Accumulator with Carry
