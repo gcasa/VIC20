@@ -35,10 +35,11 @@
     BOOL z;
     BOOL c;
     
-
-    
     // Memory...
     RAM *ram;
+    
+    // Current instruction
+    NSNumber *currentInstruction;
 }
 
 - (id) initWithSize: (NSUInteger)size;

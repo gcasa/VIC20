@@ -7,6 +7,7 @@
 //
 
 #import "AppDelegate.h"
+#import "CPU6502.h"
 
 @interface AppDelegate ()
 
@@ -17,6 +18,8 @@
 
 - (void)applicationDidFinishLaunching:(NSNotification *)aNotification {
     // Insert code here to initialize your application
+    cpu = [[CPU6502 alloc] initWithSize: 64*1024];
+    [cpu execute];
 }
 
 

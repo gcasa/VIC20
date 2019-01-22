@@ -12,7 +12,7 @@
 
 @implementation CPU6502
 
-/*
+/*  CPU INSTRUCTION TABLE
  HI    LO-NIBBLE
        00          01          02     03     04        05         06         07   08       09         0A       0B   0C        0D          0E         0F
  00    BRK impl    ORA X,ind   ---    ---    ---       ORA zpg    ASL zpg    ---  PHP impl ORA #      ASL A    ---  ---       ORA abs     ASL abs    ---
@@ -34,6 +34,8 @@
  */
 
 static NSMutableDictionary *instructionMap;
+static NSMutableArray *opCodes;
+static NSString *methodsString;
 
 + (NSDictionary *)buildDictForInstructionName: (NSString *)name
                                     paramters: (NSNumber *)parameters
@@ -41,10 +43,10 @@ static NSMutableDictionary *instructionMap;
                                        method: (NSString *)methodName
 {
     NSDictionary *insDict = [NSDictionary dictionaryWithObjectsAndKeys:
-                             @"name", name,
-                             @"paramters", parameters,
-                             @"cycles", cycles,
-                             @"methodName", methodName, nil];
+                             name, @"name",
+                             parameters, @"parameters",
+                             cycles, @"cycles",
+                             methodName, @"methodName", nil];
     return insDict;
 }
 
@@ -54,15 +56,63 @@ static NSMutableDictionary *instructionMap;
             cycles: (NSInteger)cycles
             method: (NSString *)method
 {
+    NSNumber *opcode = [NSNumber numberWithInteger:op];
     NSDictionary *dict = [self buildDictForInstructionName:name
                                                  paramters:[NSNumber numberWithInteger:par]
                                                     cycles:[NSNumber numberWithInteger:cycles]
                                                     method:method];
-    [instructionMap setObject: dict forKey:[NSNumber numberWithInteger:op]];
+    [instructionMap setObject: dict forKey:opcode];
+    [opCodes addObject:opcode];
+}
+
++ (void) generateMethodForDict: (NSDictionary *)dict
+{
+    NSString *name = [dict objectForKey:@"name"];
+    NSString *mname = [dict objectForKey:@"methodName"];
+    NSNumber *parameters = [dict objectForKey:@"parameters"];
+    NSInteger par = [parameters integerValue];
+    NSString *methodString = nil;
+    NSString *parameterStatements = @"";
+    
+    // compose parameters...
+    for(int i = 0; i < par - 1; i++)
+    {
+        parameterStatements = [parameterStatements stringByAppendingFormat:@"    pc++;\n"];
+        parameterStatements = [parameterStatements stringByAppendingFormat:@"    uint16 param%d = [ram read: pc];\n",i+1];
+        parameterStatements = [parameterStatements stringByAppendingFormat:@"    NSLog(@\"param = %@\", param%d);\n",@"%x", i+1];
+    }
+    
+    // Build method....
+    methodString = [NSString stringWithFormat:
+                    @"/* Implementation of %@ */\n"
+                    @"- (void) %@\n"
+                    @"{\n"
+                    @"    NSLog(@\"%@\");\n"
+                    @"%@"
+                    @"}\n",name, mname,
+                        name, parameterStatements];
+
+    // Add to methods...
+    methodsString = [methodsString stringByAppendingString: methodString];
+    methodsString = [methodsString stringByAppendingString: @"\n"];
+}
+
++ (void) generateMethods
+{
+    NSEnumerator *en = [opCodes objectEnumerator];
+    NSObject *k = nil;
+    while((k = [en nextObject]) != nil)
+    {
+        NSDictionary *o = [instructionMap objectForKey:k];
+        [self generateMethodForDict: o];
+    }
+    NSLog(@"\n%@",methodsString);
 }
 
 + (void) buildInstructionMap
 {
+    NSLog(@"####### Initializing CPU");
+
     /* DOCS TAKEN FROM: https://www.masswerk.at/6502/6502_instruction_set.html */
     /*
      *  add 1 to cycles if page boundery is crossed
@@ -80,6 +130,9 @@ static NSMutableDictionary *instructionMap;
      */
     
     instructionMap = [NSMutableDictionary dictionary];
+    opCodes = [NSMutableArray array];
+    methodsString = @"";
+    
     /*
     ADC  Add Memory to Accumulator with Carry
     
@@ -97,14 +150,14 @@ static NSMutableDictionary *instructionMap;
     (indirect,X)  ADC (oper,X)  61    2     6
     (indirect),Y  ADC (oper),Y  71    2     5*
     */
-    [self addOpcode:0x69 name:@"ADC" params:1 cycles:7 method:@"ADC_immediate"];
-    [self addOpcode:0x65 name:@"ADC" params:1 cycles:7 method:@"ADC_zeropage"];
-    [self addOpcode:0x75 name:@"ADC" params:1 cycles:7 method:@"ADC_zeropageX"];
-    [self addOpcode:0x6d name:@"ADC" params:1 cycles:7 method:@"ADC_absolute"];
-    [self addOpcode:0x7d name:@"ADC" params:1 cycles:7 method:@"ADC_absoluteX"];
-    [self addOpcode:0x79 name:@"ADC" params:1 cycles:7 method:@"ADC_absoluteY"];
-    [self addOpcode:0x61 name:@"ADC" params:1 cycles:7 method:@"ADC_indirectX"];
-    [self addOpcode:0x71 name:@"ADC" params:1 cycles:7 method:@"ADC_indirectY"];
+    [self addOpcode:0x69 name:@"ADC" params:2 cycles:2 method:@"ADC_immediate"];
+    [self addOpcode:0x65 name:@"ADC" params:2 cycles:3 method:@"ADC_zeropage"];
+    [self addOpcode:0x75 name:@"ADC" params:2 cycles:4 method:@"ADC_zeropageX"];
+    [self addOpcode:0x6d name:@"ADC" params:3 cycles:4 method:@"ADC_absolute"];
+    [self addOpcode:0x7d name:@"ADC" params:3 cycles:4 method:@"ADC_absoluteX"];
+    [self addOpcode:0x79 name:@"ADC" params:3 cycles:4 method:@"ADC_absoluteY"];
+    [self addOpcode:0x61 name:@"ADC" params:4 cycles:6 method:@"ADC_indirectX"];
+    [self addOpcode:0x71 name:@"ADC" params:4 cycles:5 method:@"ADC_indirectY"];
     
     /*
      AND  AND Memory with Accumulator
@@ -123,14 +176,14 @@ static NSMutableDictionary *instructionMap;
      (indirect,X)  AND (oper,X)  21    2     6
      (indirect),Y  AND (oper),Y  31    2     5*
      */
-    [self addOpcode:0x29 name:@"AND" params:1 cycles:7 method:@"AND_immediate"];
-    [self addOpcode:0x25 name:@"AND" params:1 cycles:7 method:@"AND_zeropage"];
-    [self addOpcode:0x35 name:@"AND" params:1 cycles:7 method:@"AND_zeropageX"];
-    [self addOpcode:0x2d name:@"AND" params:1 cycles:7 method:@"AND_absolute"];
-    [self addOpcode:0x3d name:@"AND" params:1 cycles:7 method:@"AND_absoluteX"];
-    [self addOpcode:0x39 name:@"AND" params:1 cycles:7 method:@"AND_absoluteY"];
-    [self addOpcode:0x21 name:@"AND" params:1 cycles:7 method:@"AND_indirectX"];
-    [self addOpcode:0x31 name:@"AND" params:1 cycles:7 method:@"AND_indirectY"];
+    [self addOpcode:0x29 name:@"AND" params:2 cycles:2 method:@"AND_immediate"];
+    [self addOpcode:0x25 name:@"AND" params:2 cycles:3 method:@"AND_zeropage"];
+    [self addOpcode:0x35 name:@"AND" params:2 cycles:4 method:@"AND_zeropageX"];
+    [self addOpcode:0x2d name:@"AND" params:3 cycles:4 method:@"AND_absolute"];
+    [self addOpcode:0x3d name:@"AND" params:3 cycles:4 method:@"AND_absoluteX"];
+    [self addOpcode:0x39 name:@"AND" params:3 cycles:4 method:@"AND_absoluteY"];
+    [self addOpcode:0x21 name:@"AND" params:2 cycles:6 method:@"AND_indirectX"];
+    [self addOpcode:0x31 name:@"AND" params:2 cycles:5 method:@"AND_indirectY"];
     
     /*
      ASL  Shift Left One Bit (Memory or Accumulator)
@@ -146,11 +199,11 @@ static NSMutableDictionary *instructionMap;
      absolute      ASL oper      0E    3     6
      absolute,X    ASL oper,X    1E    3     7
      */
-    [self addOpcode:0x29 name:@"ASL" params:1 cycles:7 method:@"ASL_accumulator"];
-    [self addOpcode:0x25 name:@"ASL" params:1 cycles:7 method:@"ASL_zeropage"];
-    [self addOpcode:0x35 name:@"ASL" params:1 cycles:7 method:@"ASL_zeropageX"];
-    [self addOpcode:0x2d name:@"ASL" params:1 cycles:7 method:@"ASL_absolute"];
-    [self addOpcode:0x3d name:@"ASL" params:1 cycles:7 method:@"ASL_absoluteX"];
+    [self addOpcode:0x0a name:@"ASL" params:1 cycles:2 method:@"ASL_accumulator"];
+    [self addOpcode:0x06 name:@"ASL" params:2 cycles:5 method:@"ASL_zeropage"];
+    [self addOpcode:0x16 name:@"ASL" params:2 cycles:6 method:@"ASL_zeropageX"];
+    [self addOpcode:0x0e name:@"ASL" params:3 cycles:6 method:@"ASL_absolute"];
+    [self addOpcode:0x1e name:@"ASL" params:3 cycles:7 method:@"ASL_absoluteX"];
     
     /*
      BCC  Branch on Carry Clear
@@ -162,7 +215,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BCC oper      90    2     2**
      */
-    [self addOpcode:0x90 name:@"BCC" params:1 cycles:7 method:@"BCC_relative"];
+    [self addOpcode:0x90 name:@"BCC" params:2 cycles:2 method:@"BCC_relative"];
     
     /*
      BCS  Branch on Carry Set
@@ -174,7 +227,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BCS oper      B0    2     2**
      */
-    [self addOpcode:0xb0 name:@"BCS" params:1 cycles:7 method:@"BCS_relative"];
+    [self addOpcode:0xb0 name:@"BCS" params:2 cycles:2 method:@"BCS_relative"];
     
     /*
      BEQ  Branch on Result Zero
@@ -186,7 +239,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BEQ oper      F0    2     2**
     */
-    [self addOpcode:0xf0 name:@"BEQ" params:1 cycles:7 method:@"BEQ_relative"];
+    [self addOpcode:0xf0 name:@"BEQ" params:2 cycles:2 method:@"BEQ_relative"];
 
     /*
      BIT  Test Bits in Memory with Accumulator
@@ -202,8 +255,8 @@ static NSMutableDictionary *instructionMap;
      zeropage      BIT oper      24    2     3
      absolute      BIT oper      2C    3     4
      */
-    [self addOpcode:0x24 name:@"BIT" params:1 cycles:7 method:@"BIT_zeropage"];
-    [self addOpcode:0x2c name:@"BIT" params:1 cycles:7 method:@"BIT_absolute"];
+    [self addOpcode:0x24 name:@"BIT" params:2 cycles:3 method:@"BIT_zeropage"];
+    [self addOpcode:0x2c name:@"BIT" params:3 cycles:4 method:@"BIT_absolute"];
     
     /*
      BMI  Branch on Result Minus
@@ -275,7 +328,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BVC oper      70    2     2**
      */
-    [self addOpcode:0x70 name:@"BVS" params:1 cycles:7 method:@"BVS_relative"];
+    [self addOpcode:0x70 name:@"BVS" params:2 cycles:2 method:@"BVS_relative"];
 
     /*
      CLC  Clear Carry Flag
@@ -449,7 +502,7 @@ static NSMutableDictionary *instructionMap;
     [self addOpcode:0x55 name:@"EOR" params:2 cycles:4 method:@"EOR_zeropageX"];
     [self addOpcode:0x4d name:@"EOR" params:3 cycles:4 method:@"EOR_absolute"];
     [self addOpcode:0x5d name:@"EOR" params:3 cycles:4 method:@"EOR_absoluteX"];
-    [self addOpcode:0x49 name:@"EOR" params:3 cycles:4 method:@"EOR_absoluteY"];
+    [self addOpcode:0x59 name:@"EOR" params:3 cycles:4 method:@"EOR_absoluteY"];
     [self addOpcode:0x41 name:@"EOR" params:2 cycles:6 method:@"EOR_indirectX"];
     [self addOpcode:0x51 name:@"EOR" params:2 cycles:5 method:@"EOR_indirectY"];
     
@@ -562,11 +615,11 @@ static NSMutableDictionary *instructionMap;
      absolute      LDX oper      AE    3     4
      absolute,Y    LDX oper,Y    BE    3     4*
      */
-    [self addOpcode:0xa2 name:@"LDX" params:1 cycles:7 method:@"LDX_immediate"];
-    [self addOpcode:0xa6 name:@"LDX" params:1 cycles:7 method:@"LDX_zeropage"];
-    [self addOpcode:0xb6 name:@"LDX" params:1 cycles:7 method:@"LDX_zeropageY"];
-    [self addOpcode:0xae name:@"LDX" params:1 cycles:7 method:@"LDX_absolute"];
-    [self addOpcode:0xbe name:@"LDX" params:1 cycles:7 method:@"LDX_absoluteY"];
+    [self addOpcode:0xa2 name:@"LDX" params:2 cycles:2 method:@"LDX_immediate"];
+    [self addOpcode:0xa6 name:@"LDX" params:2 cycles:3 method:@"LDX_zeropage"];
+    [self addOpcode:0xb6 name:@"LDX" params:2 cycles:4 method:@"LDX_zeropageY"];
+    [self addOpcode:0xae name:@"LDX" params:3 cycles:4 method:@"LDX_absolute"];
+    [self addOpcode:0xbe name:@"LDX" params:3 cycles:4 method:@"LDX_absoluteY"];
     
      /*
      LDY  Load Index Y with Memory
@@ -617,7 +670,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       NOP           EA    1     2
      */
-    [self addOpcode:0x4c name:@"NOP" params:1 cycles:2 method:@"NOP_implied"];
+    [self addOpcode:0xea name:@"NOP" params:1 cycles:2 method:@"NOP_implied"];
     
     /*
      ORA  OR Memory with Accumulator
@@ -636,14 +689,14 @@ static NSMutableDictionary *instructionMap;
      (indirect,X)  ORA (oper,X)  01    2     6
      (indirect),Y  ORA (oper),Y  11    2     5*
      */
-    [self addOpcode:0x09 name:@"ORA" params:1 cycles:2 method:@"ORA_immediate"];
-    [self addOpcode:0x05 name:@"ORA" params:1 cycles:3 method:@"ORA_zeropage"];
-    [self addOpcode:0x15 name:@"ORA" params:1 cycles:4 method:@"ORA_zeropageX"];
-    [self addOpcode:0x0D name:@"ORA" params:1 cycles:4 method:@"ORA_absolute"];
-    [self addOpcode:0x1D name:@"ORA" params:1 cycles:4 method:@"ORA_absoluteX"];
-    [self addOpcode:0x19 name:@"ORA" params:1 cycles:4 method:@"ORA_absoluteY"];
-    [self addOpcode:0x01 name:@"ORA" params:1 cycles:6 method:@"ORA_indirectX"];
-    [self addOpcode:0x11 name:@"ORA" params:1 cycles:5 method:@"ORA_indirectY"];
+    [self addOpcode:0x09 name:@"ORA" params:2 cycles:2 method:@"ORA_immediate"];
+    [self addOpcode:0x05 name:@"ORA" params:2 cycles:3 method:@"ORA_zeropage"];
+    [self addOpcode:0x15 name:@"ORA" params:2 cycles:4 method:@"ORA_zeropageX"];
+    [self addOpcode:0x0D name:@"ORA" params:3 cycles:4 method:@"ORA_absolute"];
+    [self addOpcode:0x1D name:@"ORA" params:3 cycles:4 method:@"ORA_absoluteX"];
+    [self addOpcode:0x19 name:@"ORA" params:3 cycles:4 method:@"ORA_absoluteY"];
+    [self addOpcode:0x01 name:@"ORA" params:2 cycles:6 method:@"ORA_indirectX"];
+    [self addOpcode:0x11 name:@"ORA" params:2 cycles:5 method:@"ORA_indirectY"];
 
      /*
      PHA  Push Accumulator on Stack
@@ -655,7 +708,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       PHA           48    1     3
      */
-    [self addOpcode:0x48 name:@"PHA" params:1 cycles:5 method:@"PHA_implied"];
+    [self addOpcode:0x48 name:@"PHA" params:1 cycles:3 method:@"PHA_implied"];
 
     /*
      
@@ -668,7 +721,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       PHP           08    1     3
      */
-    [self addOpcode:0x48 name:@"PHA" params:1 cycles:5 method:@"PHA_implied"];
+    [self addOpcode:0x08 name:@"PHP" params:1 cycles:3 method:@"PHP_implied"];
 
     /*
      PLA  Pull Accumulator from Stack
@@ -680,7 +733,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       PLA           68    1     4
      */
-    [self addOpcode:0x68 name:@"PLA" params:1 cycles:5 method:@"PLA_implied"];
+    [self addOpcode:0x68 name:@"PLA" params:1 cycles:4 method:@"PLA_implied"];
 
     /*
      PLP  Pull Processor Status from Stack
@@ -692,7 +745,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       PLP           28    1     4
      */
-    [self addOpcode:0x28 name:@"PLP" params:1 cycles:5 method:@"PLP_implied"];
+    [self addOpcode:0x28 name:@"PLP" params:1 cycles:4 method:@"PLP_implied"];
 
      /*
      ROL  Rotate One Bit Left (Memory or Accumulator)
@@ -708,11 +761,11 @@ static NSMutableDictionary *instructionMap;
      absolute      ROL oper      2E    3     6
      absolute,X    ROL oper,X    3E    3     7
      */
-    [self addOpcode:0x2a name:@"ROL" params:1 cycles:5 method:@"ROL_accumulator"];
-    [self addOpcode:0x26 name:@"ROL" params:1 cycles:5 method:@"ROL_zeropage"];
-    [self addOpcode:0x36 name:@"ROL" params:1 cycles:5 method:@"ROL_zeropageX"];
-    [self addOpcode:0x2e name:@"ROL" params:1 cycles:5 method:@"ROL_absolute"];
-    [self addOpcode:0x3e name:@"ROL" params:1 cycles:5 method:@"ROL_absoluteX"];
+    [self addOpcode:0x2a name:@"ROL" params:1 cycles:2 method:@"ROL_accumulator"];
+    [self addOpcode:0x26 name:@"ROL" params:2 cycles:5 method:@"ROL_zeropage"];
+    [self addOpcode:0x36 name:@"ROL" params:2 cycles:6 method:@"ROL_zeropageX"];
+    [self addOpcode:0x2e name:@"ROL" params:3 cycles:6 method:@"ROL_absolute"];
+    [self addOpcode:0x3e name:@"ROL" params:3 cycles:7 method:@"ROL_absoluteX"];
 
     /*
      ROR  Rotate One Bit Right (Memory or Accumulator)
@@ -728,11 +781,11 @@ static NSMutableDictionary *instructionMap;
      absolute      ROR oper      6E    3     6
      absolute,X    ROR oper,X    7E    3     7
      */
-    [self addOpcode:0x6a name:@"ROR" params:1 cycles:5 method:@"ROR_accumulator"];
-    [self addOpcode:0x66 name:@"ROR" params:1 cycles:5 method:@"ROR_zeropage"];
-    [self addOpcode:0x76 name:@"ROR" params:1 cycles:5 method:@"ROR_zeropageX"];
-    [self addOpcode:0x6e name:@"ROR" params:1 cycles:5 method:@"ROR_absolute"];
-    [self addOpcode:0x7e name:@"ROR" params:1 cycles:5 method:@"ROR_absoluteX"];
+    [self addOpcode:0x6a name:@"ROR" params:1 cycles:2 method:@"ROR_accumulator"];
+    [self addOpcode:0x66 name:@"ROR" params:2 cycles:5 method:@"ROR_zeropage"];
+    [self addOpcode:0x76 name:@"ROR" params:2 cycles:6 method:@"ROR_zeropageX"];
+    [self addOpcode:0x6e name:@"ROR" params:3 cycles:6 method:@"ROR_absolute"];
+    [self addOpcode:0x7e name:@"ROR" params:3 cycles:7 method:@"ROR_absoluteX"];
     
      /*
      RTI  Return from Interrupt
@@ -744,7 +797,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       RTI           40    1     6
      */
-    [self addOpcode:0x40 name:@"RTI" params:1 cycles:5 method:@"RTI_implied"];
+    [self addOpcode:0x40 name:@"RTI" params:1 cycles:6 method:@"RTI_implied"];
     
      /*
      RTS  Return from Subroutine
@@ -756,7 +809,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       RTS           60    1     6
      */
-    [self addOpcode:0x60 name:@"RTS" params:1 cycles:5 method:@"RTS_implied"];
+    [self addOpcode:0x60 name:@"RTS" params:1 cycles:6 method:@"RTS_implied"];
 
      /*
      SBC  Subtract Memory from Accumulator with Borrow
@@ -775,14 +828,14 @@ static NSMutableDictionary *instructionMap;
      (indirect,X)  SBC (oper,X)  E1    2     6
      (indirect),Y  SBC (oper),Y  F1    2     5*
      */
-    [self addOpcode:0xe9 name:@"SBC" params:1 cycles:2 method:@"SBC_immediate"];
-    [self addOpcode:0xe5 name:@"SBC" params:1 cycles:3 method:@"SBC_zeropage"];
-    [self addOpcode:0xf5 name:@"SBC" params:1 cycles:4 method:@"SBC_zeropageX"];
-    [self addOpcode:0xfD name:@"SBC" params:1 cycles:4 method:@"SBC_absolute"];
-    [self addOpcode:0xfD name:@"SBC" params:1 cycles:4 method:@"SBC_absoluteX"];
-    [self addOpcode:0xf9 name:@"SBC" params:1 cycles:4 method:@"SBC_absoluteY"];
-    [self addOpcode:0xe1 name:@"SBC" params:1 cycles:6 method:@"SBC_indirectX"];
-    [self addOpcode:0xf1 name:@"SBC" params:1 cycles:5 method:@"SBC_indirectY"];
+    [self addOpcode:0xe9 name:@"SBC" params:2 cycles:2 method:@"SBC_immediate"];
+    [self addOpcode:0xe5 name:@"SBC" params:2 cycles:3 method:@"SBC_zeropage"];
+    [self addOpcode:0xf5 name:@"SBC" params:2 cycles:4 method:@"SBC_zeropageX"];
+    [self addOpcode:0xed name:@"SBC" params:3 cycles:4 method:@"SBC_absolute"];
+    [self addOpcode:0xfd name:@"SBC" params:3 cycles:4 method:@"SBC_absoluteX"];
+    [self addOpcode:0xf9 name:@"SBC" params:3 cycles:4 method:@"SBC_absoluteY"];
+    [self addOpcode:0xe1 name:@"SBC" params:2 cycles:6 method:@"SBC_indirectX"];
+    [self addOpcode:0xf1 name:@"SBC" params:2 cycles:5 method:@"SBC_indirectY"];
     
      /*
      SEC  Set Carry Flag
@@ -872,9 +925,9 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    STY oper,X    94    2     4
      absolute      STY oper      8C    3     4
      */
-    [self addOpcode:0x84 name:@"STY" params:2 cycles:3 method:@"STX_zeropage"];
-    [self addOpcode:0x94 name:@"STY" params:2 cycles:4 method:@"STX_zeropageX"];
-    [self addOpcode:0x8c name:@"STY" params:3 cycles:4 method:@"STX_absolute"];
+    [self addOpcode:0x84 name:@"STY" params:2 cycles:3 method:@"STY_zeropage"];
+    [self addOpcode:0x94 name:@"STY" params:2 cycles:4 method:@"STY_zeropageX"];
+    [self addOpcode:0x8c name:@"STY" params:3 cycles:4 method:@"STY_absolute"];
 
     /*
      TAX  Transfer Accumulator to Index X
@@ -948,7 +1001,8 @@ static NSMutableDictionary *instructionMap;
      */
     [self addOpcode:0x98 name:@"TYA" params:1 cycles:2 method:@"TYA_implied"];
 
-
+    // [self generateMethods];  /* Used to generate the method calls for each instruction */
+    NSLog(@"####### Finished initializing CPU");
 }
 
 + (void) initialize
@@ -963,7 +1017,7 @@ static NSMutableDictionary *instructionMap;
         [self reset];
         ram = [[RAM alloc] initWithSize: size];
     }
-    return nil;
+    return self;
 }
 
 - (void) reset
@@ -978,12 +1032,12 @@ static NSMutableDictionary *instructionMap;
     sr = 0xFF;
     
     // Initialize flags...
-    s  = 0x00;
-    b  = 0x00;
-    d  = 0x00;
-    i  = 0x00;
-    z  = 0x00;
-    c  = 0x00;
+    s  = NO;
+    b  = NO;
+    d  = NO;
+    i  = NO;
+    z  = NO;
+    c  = NO;
 }
 
 - (void) interrupt
@@ -993,17 +1047,22 @@ static NSMutableDictionary *instructionMap;
 
 - (void) fetch
 {
-    
+    uint8 opcode = [ram read: pc];
+    currentInstruction = [NSNumber numberWithInt: opcode];
 }
 
 - (void) execute
 {
-    
+    [self fetch];
+    NSString *methodName = [[instructionMap objectForKey:currentInstruction] objectForKey: @"methodName"];
+    // NSLog(@"methodName = %@",methodName);
+    SEL selector = NSSelectorFromString(methodName);
+    [self performSelector:selector];
 }
 
 - (void) step
 {
-    
+    pc++;
 }
 
 - (void) state
@@ -1022,6 +1081,1420 @@ static NSMutableDictionary *instructionMap;
     
 }
 
+// Instruction implementations...
+/* Implementation of ADC */
+- (void) ADC_immediate
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
 
+/* Implementation of ADC */
+- (void) ADC_zeropage
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
 
+/* Implementation of ADC */
+- (void) ADC_zeropageX
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ADC */
+- (void) ADC_absolute
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ADC */
+- (void) ADC_absoluteX
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ADC */
+- (void) ADC_absoluteY
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ADC */
+- (void) ADC_indirectX
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+    pc++;
+    uint16 param3 = [ram read: pc];
+    NSLog(@"param = %x", param3);
+}
+
+/* Implementation of ADC */
+- (void) ADC_indirectY
+{
+    NSLog(@"ADC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+    pc++;
+    uint16 param3 = [ram read: pc];
+    NSLog(@"param = %x", param3);
+}
+
+/* Implementation of AND */
+- (void) AND_immediate
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of AND */
+- (void) AND_zeropage
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of AND */
+- (void) AND_zeropageX
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of AND */
+- (void) AND_absolute
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of AND */
+- (void) AND_absoluteX
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of AND */
+- (void) AND_absoluteY
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of AND */
+- (void) AND_indirectX
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of AND */
+- (void) AND_indirectY
+{
+    NSLog(@"AND");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ASL */
+- (void) ASL_accumulator
+{
+    NSLog(@"ASL");
+}
+
+/* Implementation of ASL */
+- (void) ASL_zeropage
+{
+    NSLog(@"ASL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ASL */
+- (void) ASL_zeropageX
+{
+    NSLog(@"ASL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ASL */
+- (void) ASL_absolute
+{
+    NSLog(@"ASL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ASL */
+- (void) ASL_absoluteX
+{
+    NSLog(@"ASL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of BCC */
+- (void) BCC_relative
+{
+    NSLog(@"BCC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BCS */
+- (void) BCS_relative
+{
+    NSLog(@"BCS");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BEQ */
+- (void) BEQ_relative
+{
+    NSLog(@"BEQ");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BIT */
+- (void) BIT_zeropage
+{
+    NSLog(@"BIT");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BIT */
+- (void) BIT_absolute
+{
+    NSLog(@"BIT");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of BMI */
+- (void) BMI_relative
+{
+    NSLog(@"BMI");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BNE */
+- (void) BNE_relative
+{
+    NSLog(@"BNE");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BPL */
+- (void) BPL_relative
+{
+    NSLog(@"BPL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BRK */
+- (void) BRK_implied
+{
+    NSLog(@"BRK");
+}
+
+/* Implementation of BVC */
+- (void) BVC_relative
+{
+    NSLog(@"BVC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of BVS */
+- (void) BVS_relative
+{
+    NSLog(@"BVS");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CLC */
+- (void) CLC_implied
+{
+    NSLog(@"CLC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CLD */
+- (void) CLD_implied
+{
+    NSLog(@"CLD");
+}
+
+/* Implementation of CLI */
+- (void) CLI_implied
+{
+    NSLog(@"CLI");
+}
+
+/* Implementation of CLV */
+- (void) CLV_implied
+{
+    NSLog(@"CLV");
+}
+
+/* Implementation of CMP */
+- (void) CMP_immediate
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CMP */
+- (void) CMP_zeropage
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CMP */
+- (void) CMP_zeropageX
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CMP */
+- (void) CMP_absolute
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of CMP */
+- (void) CMP_absoluteX
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of CMP */
+- (void) CMP_absoluteY
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of CMP */
+- (void) CMP_indirectX
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CMP */
+- (void) CMP_indirectY
+{
+    NSLog(@"CMP");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CPX */
+- (void) CPX_immediate
+{
+    NSLog(@"CPX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CPX */
+- (void) CPX_zeropage
+{
+    NSLog(@"CPX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CPX */
+- (void) CPX_absolute
+{
+    NSLog(@"CPX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of CPY */
+- (void) CPY_immediate
+{
+    NSLog(@"CPY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CPY */
+- (void) CPY_zeropage
+{
+    NSLog(@"CPY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of CPY */
+- (void) CPY_absolute
+{
+    NSLog(@"CPY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of DEC */
+- (void) DEC_zeropage
+{
+    NSLog(@"DEC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of DEC */
+- (void) DEC_zeropageX
+{
+    NSLog(@"DEC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of DEC */
+- (void) DEC_absolute
+{
+    NSLog(@"DEC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of DEC */
+- (void) DEC_absoluteX
+{
+    NSLog(@"DEC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of DEX */
+- (void) DEX_implied
+{
+    NSLog(@"DEX");
+}
+
+/* Implementation of DEY */
+- (void) DEY_implied
+{
+    NSLog(@"DEY");
+}
+
+/* Implementation of EOR */
+- (void) EOR_immediate
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of EOR */
+- (void) EOR_zeropage
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of EOR */
+- (void) EOR_zeropageX
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of EOR */
+- (void) EOR_absolute
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of EOR */
+- (void) EOR_absoluteX
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of EOR */
+- (void) EOR_absoluteY
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of EOR */
+- (void) EOR_indirectX
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of EOR */
+- (void) EOR_indirectY
+{
+    NSLog(@"EOR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of INC */
+- (void) INC_zeropage
+{
+    NSLog(@"INC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of INC */
+- (void) INC_zeropageX
+{
+    NSLog(@"INC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of INC */
+- (void) INC_absolute
+{
+    NSLog(@"INC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of INC */
+- (void) INC_absoluteX
+{
+    NSLog(@"INC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of INX */
+- (void) INX_implied
+{
+    NSLog(@"INX");
+}
+
+/* Implementation of INY */
+- (void) INY_implied
+{
+    NSLog(@"INY");
+}
+
+/* Implementation of JMP */
+- (void) INX_absolute
+{
+    NSLog(@"JMP");
+}
+
+/* Implementation of JMP */
+- (void) JMP_indirect
+{
+    NSLog(@"JMP");
+}
+
+/* Implementation of JSP */
+- (void) JSR_absolute
+{
+    NSLog(@"JSP");
+}
+
+/* Implementation of LDA */
+- (void) LDA_immediate
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDA */
+- (void) LDA_zeropage
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDA */
+- (void) LDA_zeropageX
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDA */
+- (void) LDA_absolute
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LDA */
+- (void) LDA_absoluteX
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LDA */
+- (void) LDA_absoluteY
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LDA */
+- (void) LDA_indirectX
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDA */
+- (void) LDA_indirectY
+{
+    NSLog(@"LDA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDX */
+- (void) LDX_immediate
+{
+    NSLog(@"LDX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDX */
+- (void) LDX_zeropage
+{
+    NSLog(@"LDX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDX */
+- (void) LDX_zeropageY
+{
+    NSLog(@"LDX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDX */
+- (void) LDX_absolute
+{
+    NSLog(@"LDX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LDX */
+- (void) LDX_absoluteY
+{
+    NSLog(@"LDX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LDY */
+- (void) LDY_immediate
+{
+    NSLog(@"LDY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDY */
+- (void) LDY_zeropage
+{
+    NSLog(@"LDY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDY */
+- (void) LDY_zeropageX
+{
+    NSLog(@"LDY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LDY */
+- (void) LDY_absolute
+{
+    NSLog(@"LDY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LDY */
+- (void) LDY_absoluteX
+{
+    NSLog(@"LDY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LSR */
+- (void) LSR_accumulator
+{
+    NSLog(@"LSR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LSR */
+- (void) LSR_zeropage
+{
+    NSLog(@"LSR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LSR */
+- (void) LSR_zeropageX
+{
+    NSLog(@"LSR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of LSR */
+- (void) LSR_absolute
+{
+    NSLog(@"LSR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of LSR */
+- (void) LSR_absoluteX
+{
+    NSLog(@"LSR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of NOP */
+- (void) NOP_implied
+{
+    NSLog(@"NOP");
+}
+
+/* Implementation of ORA */
+- (void) ORA_immediate
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ORA */
+- (void) ORA_zeropage
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ORA */
+- (void) ORA_zeropageX
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ORA */
+- (void) ORA_absolute
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ORA */
+- (void) ORA_absoluteX
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ORA */
+- (void) ORA_absoluteY
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ORA */
+- (void) ORA_indirectX
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ORA */
+- (void) ORA_indirectY
+{
+    NSLog(@"ORA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of PHA */
+- (void) PHA_implied
+{
+    NSLog(@"PHA");
+}
+
+/* Implementation of PHP */
+- (void) PHP_implied
+{
+    NSLog(@"PHP");
+}
+
+/* Implementation of PLA */
+- (void) PLA_implied
+{
+    NSLog(@"PLA");
+}
+
+/* Implementation of PLP */
+- (void) PLP_implied
+{
+    NSLog(@"PLP");
+}
+
+/* Implementation of ROL */
+- (void) ROL_accumulator
+{
+    NSLog(@"ROL");
+}
+
+/* Implementation of ROL */
+- (void) ROL_zeropage
+{
+    NSLog(@"ROL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ROL */
+- (void) ROL_zeropageX
+{
+    NSLog(@"ROL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ROL */
+- (void) ROL_absolute
+{
+    NSLog(@"ROL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ROL */
+- (void) ROL_absoluteX
+{
+    NSLog(@"ROL");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ROR */
+- (void) ROR_accumulator
+{
+    NSLog(@"ROR");
+}
+
+/* Implementation of ROR */
+- (void) ROR_zeropage
+{
+    NSLog(@"ROR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ROR */
+- (void) ROR_zeropageX
+{
+    NSLog(@"ROR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of ROR */
+- (void) ROR_absolute
+{
+    NSLog(@"ROR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of ROR */
+- (void) ROR_absoluteX
+{
+    NSLog(@"ROR");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of RTI */
+- (void) RTI_implied
+{
+    NSLog(@"RTI");
+}
+
+/* Implementation of RTS */
+- (void) RTS_implied
+{
+    NSLog(@"RTS");
+}
+
+/* Implementation of SBC */
+- (void) SBC_immediate
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of SBC */
+- (void) SBC_zeropage
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of SBC */
+- (void) SBC_zeropageX
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of SBC */
+- (void) SBC_absolute
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of SBC */
+- (void) SBC_absoluteX
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of SBC */
+- (void) SBC_absoluteY
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of SBC */
+- (void) SBC_indirectX
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of SBC */
+- (void) SBC_indirectY
+{
+    NSLog(@"SBC");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of SEC */
+- (void) SEC_implied
+{
+    NSLog(@"SEC");
+}
+
+/* Implementation of SED */
+- (void) SED_implied
+{
+    NSLog(@"SED");
+}
+
+/* Implementation of SEI */
+- (void) SEI_implied
+{
+    NSLog(@"SEI");
+}
+
+/* Implementation of STA */
+- (void) STA_zeropage
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STA */
+- (void) STA_zeropageX
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STA */
+- (void) STA_absolute
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of STA */
+- (void) STA_absoluteX
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of STA */
+- (void) STA_absoluteY
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of STA */
+- (void) STA_indirectX
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STA */
+- (void) STA_inderectY
+{
+    NSLog(@"STA");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STX */
+- (void) STX_zeropage
+{
+    NSLog(@"STX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STX */
+- (void) STX_zeropageY
+{
+    NSLog(@"STX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STX */
+- (void) STX_absolute
+{
+    NSLog(@"STX");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of STY */
+- (void) STY_zeropage
+{
+    NSLog(@"STY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STY */
+- (void) STY_zeropageX
+{
+    NSLog(@"STY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+}
+
+/* Implementation of STY */
+- (void) STY_absolute
+{
+    NSLog(@"STY");
+    pc++;
+    uint16 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint16 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
+}
+
+/* Implementation of TAX */
+- (void) TAX_implied
+{
+    NSLog(@"TAX");
+}
+
+/* Implementation of TAY */
+- (void) TAY_implied
+{
+    NSLog(@"TAY");
+}
+
+/* Implementation of TSX */
+- (void) TSX_implied
+{
+    NSLog(@"TSX");
+}
+
+/* Implementation of TXA */
+- (void) TXA_implied
+{
+    NSLog(@"TXA");
+}
+
+/* Implementation of TXS */
+- (void) TXS_implied
+{
+    NSLog(@"TXS");
+}
+
+/* Implementation of TYA */
+- (void) TYA_implied
+{
+    NSLog(@"TYA");
+}
 @end

@@ -8,8 +8,11 @@
 
 #import <Cocoa/Cocoa.h>
 
+@class CPU6502;
+
 @interface AppDelegate : NSObject <NSApplicationDelegate>
-
-
+{
+    CPU6502 *cpu;
+}
 @end
 
