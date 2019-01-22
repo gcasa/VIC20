@@ -794,7 +794,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       SEC           38    1     2
      */
-    [self addOpcode:0x60 name:@"SEC" params:1 cycles:5 method:@"SEC_implied"];
+    [self addOpcode:0x38 name:@"SEC" params:1 cycles:2 method:@"SEC_implied"];
 
     /*
      SED  Set Decimal Flag
@@ -805,8 +805,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       SED           F8    1     2
-     
-     
+     */
+    [self addOpcode:0xf8 name:@"SED" params:1 cycles:2 method:@"SED_implied"];
+
+     /*
      SEI  Set Interrupt Disable Status
      
      1 -> I                           N Z C I D V
@@ -815,8 +817,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       SEI           78    1     2
-     
-     
+     */
+    [self addOpcode:0x78 name:@"SEI" params:1 cycles:2 method:@"SEI_implied"];
+
+     /*
      STA  Store Accumulator in Memory
      
      A -> M                           N Z C I D V
@@ -831,8 +835,16 @@ static NSMutableDictionary *instructionMap;
      absolute,Y    STA oper,Y    99    3     5
      (indirect,X)  STA (oper,X)  81    2     6
      (indirect),Y  STA (oper),Y  91    2     6
-     
-     
+     */
+    [self addOpcode:0x85 name:@"STA" params:2 cycles:3 method:@"STA_zeropage"];
+    [self addOpcode:0x95 name:@"STA" params:2 cycles:4 method:@"STA_zeropageX"];
+    [self addOpcode:0x8d name:@"STA" params:3 cycles:4 method:@"STA_absolute"];
+    [self addOpcode:0x9d name:@"STA" params:3 cycles:5 method:@"STA_absoluteX"];
+    [self addOpcode:0x99 name:@"STA" params:3 cycles:5 method:@"STA_absoluteY"];
+    [self addOpcode:0x81 name:@"STA" params:2 cycles:6 method:@"STA_indirectX"];
+    [self addOpcode:0x91 name:@"STA" params:2 cycles:6 method:@"STA_inderectY"];
+
+    /*
      STX  Store Index X in Memory
      
      X -> M                           N Z C I D V
@@ -843,8 +855,12 @@ static NSMutableDictionary *instructionMap;
      zeropage      STX oper      86    2     3
      zeropage,Y    STX oper,Y    96    2     4
      absolute      STX oper      8E    3     4
-     
-     
+    */
+    [self addOpcode:0x86 name:@"STX" params:2 cycles:3 method:@"STX_zeropage"];
+    [self addOpcode:0x96 name:@"STX" params:2 cycles:4 method:@"STX_zeropageY"];
+    [self addOpcode:0x8e name:@"STX" params:3 cycles:4 method:@"STX_absolute"];
+    
+    /*
      STY  Sore Index Y in Memory
      
      Y -> M                           N Z C I D V
@@ -855,8 +871,12 @@ static NSMutableDictionary *instructionMap;
      zeropage      STY oper      84    2     3
      zeropage,X    STY oper,X    94    2     4
      absolute      STY oper      8C    3     4
-     
-     
+     */
+    [self addOpcode:0x84 name:@"STY" params:2 cycles:3 method:@"STX_zeropage"];
+    [self addOpcode:0x94 name:@"STY" params:2 cycles:4 method:@"STX_zeropageX"];
+    [self addOpcode:0x8c name:@"STY" params:3 cycles:4 method:@"STX_absolute"];
+
+    /*
      TAX  Transfer Accumulator to Index X
      
      A -> X                           N Z C I D V
@@ -865,8 +885,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       TAX           AA    1     2
-     
-     
+     */
+    [self addOpcode:0xaa name:@"TAX" params:1 cycles:2 method:@"TAX_implied"];
+
+    /*
      TAY  Transfer Accumulator to Index Y
      
      A -> Y                           N Z C I D V
@@ -876,7 +898,8 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       TAY           A8    1     2
     */
-    
+    [self addOpcode:0xa8 name:@"TAY" params:1 cycles:2 method:@"TAY_implied"];
+
      /*
      TSX  Transfer Stack Pointer to Index X
      
@@ -887,7 +910,8 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       TSX           BA    1     2
      */
-    
+    [self addOpcode:0xba name:@"TSX" params:1 cycles:2 method:@"TSX_implied"];
+
     /*
      TXA  Transfer Index X to Accumulator
      
@@ -898,7 +922,8 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       TXA           8A    1     2
     */
-    
+    [self addOpcode:0x8a name:@"TXA" params:1 cycles:2 method:@"TXA_implied"];
+
     /*
      TXS  Transfer Index X to Stack Register
      
@@ -909,7 +934,8 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       TXS           9A    1     2
      */
-    
+    [self addOpcode:0x9a name:@"TXS" params:1 cycles:2 method:@"TXS_implied"];
+
      /*
      TYA  Transfer Index Y to Accumulator
      
@@ -920,6 +946,8 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       TYA           98    1     2
      */
+    [self addOpcode:0x98 name:@"TYA" params:1 cycles:2 method:@"TYA_implied"];
+
 
 }
 
