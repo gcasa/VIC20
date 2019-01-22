@@ -346,7 +346,7 @@ static NSString *methodsString;
      CLD  Clear Decimal Mode
      
      0 -> D                           N Z C I D V
-     - - - - 0 -
+                                      - - - - 0 -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -359,7 +359,7 @@ static NSString *methodsString;
      CLI  Clear Interrupt Disable Bit
      
      0 -> I                           N Z C I D V
-     - - - 0 - -
+                                      - - - 0 - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -372,7 +372,7 @@ static NSString *methodsString;
      CLV  Clear Overflow Flag
      
      0 -> V                           N Z C I D V
-     - - - - - 0
+                                      - - - - - 0
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -384,7 +384,7 @@ static NSString *methodsString;
      CMP  Compare Memory with Accumulator
      
      A - M                            N Z C I D V
-     + + + - - -
+                                      + + + - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -410,7 +410,7 @@ static NSString *methodsString;
      CPX  Compare Memory and Index X
      
      X - M                            N Z C I D V
-     + + + - - -
+                                      + + + - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -426,7 +426,7 @@ static NSString *methodsString;
      CPY  Compare Memory and Index Y
      
      Y - M                            N Z C I D V
-     + + + - - -
+                                      + + + - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -442,7 +442,7 @@ static NSString *methodsString;
      DEC  Decrement Memory by One
      
      M - 1 -> M                       N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -460,7 +460,7 @@ static NSString *methodsString;
      DEX  Decrement Index X by One
      
      X - 1 -> X                       N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -472,7 +472,7 @@ static NSString *methodsString;
      DEY  Decrement Index Y by One
      
      Y - 1 -> Y                       N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -484,7 +484,7 @@ static NSString *methodsString;
      EOR  Exclusive-OR Memory with Accumulator
      
      A EOR M -> A                     N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -510,7 +510,7 @@ static NSString *methodsString;
      INC  Increment Memory by One
      
      M + 1 -> M                       N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -528,7 +528,7 @@ static NSString *methodsString;
      INX  Increment Index X by One
      
      X + 1 -> X                       N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -540,7 +540,7 @@ static NSString *methodsString;
      INY  Increment Index Y by One
      
      Y + 1 -> Y                       N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -579,7 +579,7 @@ static NSString *methodsString;
      LDA  Load Accumulator with Memory
      
      M -> A                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -605,7 +605,7 @@ static NSString *methodsString;
      LDX  Load Index X with Memory
      
      M -> X                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -625,7 +625,7 @@ static NSString *methodsString;
      LDY  Load Index Y with Memory
      
      M -> Y                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -645,7 +645,7 @@ static NSString *methodsString;
      LSR  Shift One Bit Right (Memory or Accumulator)
      
      0 -> [76543210] -> C             N Z C I D V
-     - + + - - -
+                                      - + + - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -664,7 +664,7 @@ static NSString *methodsString;
      NOP  No Operation
      
      ---                              N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -676,7 +676,7 @@ static NSString *methodsString;
      ORA  OR Memory with Accumulator
      
      A OR M -> A                      N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -702,7 +702,7 @@ static NSString *methodsString;
      PHA  Push Accumulator on Stack
      
      push A                           N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -715,7 +715,7 @@ static NSString *methodsString;
      PHP  Push Processor Status on Stack
      
      push SR                          N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -727,7 +727,7 @@ static NSString *methodsString;
      PLA  Pull Accumulator from Stack
      
      pull A                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -751,7 +751,7 @@ static NSString *methodsString;
      ROL  Rotate One Bit Left (Memory or Accumulator)
      
      C <- [76543210] <- C             N Z C I D V
-     + + + - - -
+                                      + + + - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -771,7 +771,7 @@ static NSString *methodsString;
      ROR  Rotate One Bit Right (Memory or Accumulator)
      
      C -> [76543210] -> C             N Z C I D V
-     + + + - - -
+                                      + + + - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -803,7 +803,7 @@ static NSString *methodsString;
      RTS  Return from Subroutine
      
      pull PC, PC+1 -> PC              N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -815,7 +815,7 @@ static NSString *methodsString;
      SBC  Subtract Memory from Accumulator with Borrow
      
      A - M - C -> A                   N Z C I D V
-     + + + - - +
+                                      + + + - - +
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -841,7 +841,7 @@ static NSString *methodsString;
      SEC  Set Carry Flag
      
      1 -> C                           N Z C I D V
-     - - 1 - - -
+                                      - - 1 - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -853,7 +853,7 @@ static NSString *methodsString;
      SED  Set Decimal Flag
      
      1 -> D                           N Z C I D V
-     - - - - 1 -
+                                      - - - - 1 -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -865,7 +865,7 @@ static NSString *methodsString;
      SEI  Set Interrupt Disable Status
      
      1 -> I                           N Z C I D V
-     - - - 1 - -
+                                      - - - 1 - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -877,7 +877,7 @@ static NSString *methodsString;
      STA  Store Accumulator in Memory
      
      A -> M                           N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -901,7 +901,7 @@ static NSString *methodsString;
      STX  Store Index X in Memory
      
      X -> M                           N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -917,7 +917,7 @@ static NSString *methodsString;
      STY  Sore Index Y in Memory
      
      Y -> M                           N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -933,7 +933,7 @@ static NSString *methodsString;
      TAX  Transfer Accumulator to Index X
      
      A -> X                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -945,7 +945,7 @@ static NSString *methodsString;
      TAY  Transfer Accumulator to Index Y
      
      A -> Y                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -957,7 +957,7 @@ static NSString *methodsString;
      TSX  Transfer Stack Pointer to Index X
      
      SP -> X                          N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -969,7 +969,7 @@ static NSString *methodsString;
      TXA  Transfer Index X to Accumulator
      
      X -> A                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -981,7 +981,7 @@ static NSString *methodsString;
      TXS  Transfer Index X to Stack Register
      
      X -> SP                          N Z C I D V
-     - - - - - -
+                                      - - - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
@@ -993,7 +993,7 @@ static NSString *methodsString;
      TYA  Transfer Index Y to Accumulator
      
      Y -> A                           N Z C I D V
-     + + - - - -
+                                      + + - - - -
      
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
