@@ -587,7 +587,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       PHA           48    1     3
-     
+     */
+    [self addOpcode:0x48 name:@"PHA" params:1 cycles:5 method:@"PHA_implied"];
+
+    /*
      
      PHP  Push Processor Status on Stack
      
@@ -597,8 +600,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       PHP           08    1     3
-     
-     
+     */
+    [self addOpcode:0x48 name:@"PHA" params:1 cycles:5 method:@"PHA_implied"];
+
+    /*
      PLA  Pull Accumulator from Stack
      
      pull A                           N Z C I D V
@@ -607,8 +612,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       PLA           68    1     4
-     
-     
+     */
+    [self addOpcode:0x68 name:@"PLA" params:1 cycles:5 method:@"PLA_implied"];
+
+    /*
      PLP  Pull Processor Status from Stack
      
      pull SR                          N Z C I D V
@@ -617,8 +624,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       PLP           28    1     4
-     
-     
+     */
+    [self addOpcode:0x28 name:@"PLP" params:1 cycles:5 method:@"PLP_implied"];
+
+     /*
      ROL  Rotate One Bit Left (Memory or Accumulator)
      
      C <- [76543210] <- C             N Z C I D V
@@ -631,8 +640,14 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    ROL oper,X    36    2     6
      absolute      ROL oper      2E    3     6
      absolute,X    ROL oper,X    3E    3     7
-     
-     
+     */
+    [self addOpcode:0x2a name:@"ROL" params:1 cycles:5 method:@"ROL_accumulator"];
+    [self addOpcode:0x26 name:@"ROL" params:1 cycles:5 method:@"ROL_zeropage"];
+    [self addOpcode:0x36 name:@"ROL" params:1 cycles:5 method:@"ROL_zeropageX"];
+    [self addOpcode:0x2e name:@"ROL" params:1 cycles:5 method:@"ROL_absolute"];
+    [self addOpcode:0x3e name:@"ROL" params:1 cycles:5 method:@"ROL_absoluteX"];
+
+    /*
      ROR  Rotate One Bit Right (Memory or Accumulator)
      
      C -> [76543210] -> C             N Z C I D V
@@ -772,8 +787,9 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       TAY           A8    1     2
-     
-     
+    */
+    
+     /*
      TSX  Transfer Stack Pointer to Index X
      
      SP -> X                          N Z C I D V
@@ -782,8 +798,9 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       TSX           BA    1     2
-     
-     
+     */
+    
+    /*
      TXA  Transfer Index X to Accumulator
      
      X -> A                           N Z C I D V
@@ -792,8 +809,9 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       TXA           8A    1     2
-     
-     
+    */
+    
+    /*
      TXS  Transfer Index X to Stack Register
      
      X -> SP                          N Z C I D V
@@ -802,8 +820,9 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       TXS           9A    1     2
-     
-     
+     */
+    
+     /*
      TYA  Transfer Index Y to Accumulator
      
      Y -> A                           N Z C I D V
@@ -812,7 +831,6 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       TYA           98    1     2
-
      */
 
 }
