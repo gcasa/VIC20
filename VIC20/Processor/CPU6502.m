@@ -397,8 +397,13 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    DEC oper,X    D6    2     6
      absolute      DEC oper      CE    3     3
      absolute,X    DEC oper,X    DE    3     7
-     
-     
+     */
+    [self addOpcode:0xc6 name:@"DEC" params:2 cycles:2 method:@"DEC_zeropage"];
+    [self addOpcode:0xd6 name:@"DEC" params:2 cycles:3 method:@"DEC_zeropageX"];
+    [self addOpcode:0xce name:@"DEC" params:3 cycles:4 method:@"DEC_absolute"];
+    [self addOpcode:0xde name:@"DEC" params:3 cycles:4 method:@"DEC_absoluteX"];
+
+     /*
      DEX  Decrement Index X by One
      
      X - 1 -> X                       N Z C I D V
@@ -407,8 +412,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       DEC           CA    1     2
-     
-     
+     */
+    [self addOpcode:0xca name:@"DEX" params:1 cycles:2 method:@"DEX_implied"];
+
+    /*
      DEY  Decrement Index Y by One
      
      Y - 1 -> Y                       N Z C I D V
@@ -417,8 +424,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       DEC           88    1     2
-     
-     
+    */
+    [self addOpcode:0x88 name:@"DEY" params:1 cycles:2 method:@"DEY_implied"];
+
+    /*
      EOR  Exclusive-OR Memory with Accumulator
      
      A EOR M -> A                     N Z C I D V
@@ -434,8 +443,17 @@ static NSMutableDictionary *instructionMap;
      absolute,Y    EOR oper,Y    59    3     4*
      (indirect,X)  EOR (oper,X)  41    2     6
      (indirect),Y  EOR (oper),Y  51    2     5*
-     
-     
+     */
+    [self addOpcode:0x49 name:@"EOR" params:2 cycles:2 method:@"EOR_immediate"];
+    [self addOpcode:0x45 name:@"EOR" params:2 cycles:3 method:@"EOR_zeropage"];
+    [self addOpcode:0x55 name:@"EOR" params:2 cycles:4 method:@"EOR_zeropageX"];
+    [self addOpcode:0x4d name:@"EOR" params:3 cycles:4 method:@"EOR_absolute"];
+    [self addOpcode:0x5d name:@"EOR" params:3 cycles:4 method:@"EOR_absoluteX"];
+    [self addOpcode:0x49 name:@"EOR" params:3 cycles:4 method:@"EOR_absoluteY"];
+    [self addOpcode:0x41 name:@"EOR" params:2 cycles:6 method:@"EOR_indirectX"];
+    [self addOpcode:0x51 name:@"EOR" params:2 cycles:5 method:@"EOR_indirectY"];
+    
+     /*
      INC  Increment Memory by One
      
      M + 1 -> M                       N Z C I D V
@@ -447,8 +465,13 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    INC oper,X    F6    2     6
      absolute      INC oper      EE    3     6
      absolute,X    INC oper,X    FE    3     7
-     
-     
+     */
+    [self addOpcode:0xe6 name:@"INC" params:2 cycles:2 method:@"INC_zeropage"];
+    [self addOpcode:0xf6 name:@"INC" params:2 cycles:3 method:@"INC_zeropageX"];
+    [self addOpcode:0xee name:@"INC" params:3 cycles:4 method:@"INC_absolute"];
+    [self addOpcode:0xfe name:@"INC" params:3 cycles:4 method:@"INC_absoluteX"];
+
+    /*
      INX  Increment Index X by One
      
      X + 1 -> X                       N Z C I D V
