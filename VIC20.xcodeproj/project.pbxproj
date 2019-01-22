@@ -16,6 +16,7 @@
 		14B27194213A1A8F00E9588E /* RAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27193213A1A8F00E9588E /* RAM.m */; };
 		14B27197213A1ACE00E9588E /* ROM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27196213A1ACE00E9588E /* ROM.m */; };
 		14B2719C213A1B9E00E9588E /* Memory.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719B213A1B9E00E9588E /* Memory.m */; };
+		14B7195D21F70F4700C72FFB /* temp.img in Resources */ = {isa = PBXBuildFile; fileRef = 14B7195C21F70CF400C72FFB /* temp.img */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -37,6 +38,7 @@
 		14B27196213A1ACE00E9588E /* ROM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ROM.m; sourceTree = "<group>"; };
 		14B27198213A1AEF00E9588E /* Memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
 		14B2719B213A1B9E00E9588E /* Memory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Memory.m; sourceTree = "<group>"; };
+		14B7195C21F70CF400C72FFB /* temp.img */ = {isa = PBXFileReference; lastKnownFileType = file; path = temp.img; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -75,6 +77,7 @@
 				14B271762136071200E9588E /* AppDelegate.m */,
 				14B271782136071400E9588E /* Assets.xcassets */,
 				14B2717A2136071400E9588E /* MainMenu.xib */,
+				14B7195C21F70CF400C72FFB /* temp.img */,
 				14B2717D2136071400E9588E /* Info.plist */,
 				14B2717E2136071400E9588E /* main.m */,
 				14B271802136071400E9588E /* VIC20.entitlements */,
@@ -163,6 +166,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				14B7195D21F70F4700C72FFB /* temp.img in Resources */,
 				14B271792136071400E9588E /* Assets.xcassets in Resources */,
 				14B2717C2136071400E9588E /* MainMenu.xib in Resources */,
 			);

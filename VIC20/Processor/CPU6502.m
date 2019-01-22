@@ -1060,6 +1060,17 @@ static NSString *methodsString;
     [self performSelector:selector];
 }
 
+- (void) executeAtLocation: (uint16)loc
+{
+    pc = loc;
+    [self execute];
+}
+
+- (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc
+{
+    [ram loadProgramFile:fileName atLocation:loc];
+}
+
 - (void) step
 {
     pc++;

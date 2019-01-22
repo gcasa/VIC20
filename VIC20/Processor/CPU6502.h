@@ -49,6 +49,8 @@
 
 - (void) fetch;
 - (void) execute;
+- (void) executeAtLocation: (uint16)loc;
+- (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc;
 - (void) step;
     
 - (void) state;
