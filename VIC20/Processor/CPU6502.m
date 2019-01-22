@@ -660,8 +660,14 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    ROR oper,X    76    2     6
      absolute      ROR oper      6E    3     6
      absolute,X    ROR oper,X    7E    3     7
-     
-     
+     */
+    [self addOpcode:0x6a name:@"ROR" params:1 cycles:5 method:@"ROR_accumulator"];
+    [self addOpcode:0x66 name:@"ROR" params:1 cycles:5 method:@"ROR_zeropage"];
+    [self addOpcode:0x76 name:@"ROR" params:1 cycles:5 method:@"ROR_zeropageX"];
+    [self addOpcode:0x6e name:@"ROR" params:1 cycles:5 method:@"ROR_absolute"];
+    [self addOpcode:0x7e name:@"ROR" params:1 cycles:5 method:@"ROR_absoluteX"];
+    
+     /*
      RTI  Return from Interrupt
      
      pull SR, pull PC                 N Z C I D V
@@ -670,8 +676,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       RTI           40    1     6
-     
-     
+     */
+    [self addOpcode:0x40 name:@"RTI" params:1 cycles:5 method:@"RTI_implied"];
+    
+     /*
      RTS  Return from Subroutine
      
      pull PC, PC+1 -> PC              N Z C I D V
@@ -680,8 +688,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       RTS           60    1     6
-     
-     
+     */
+    [self addOpcode:0x60 name:@"RTS" params:1 cycles:5 method:@"RTS_implied"];
+
+     /*
      SBC  Subtract Memory from Accumulator with Borrow
      
      A - M - C -> A                   N Z C I D V
