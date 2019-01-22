@@ -1042,30 +1042,13 @@ static NSString *methodsString;
 
 - (void) interrupt
 {
-    
+    i = YES;
 }
 
 - (void) fetch
 {
     uint8 opcode = [ram read: pc];
     currentInstruction = [NSNumber numberWithInt: opcode];
-}
-
-- (void) execute
-{
-    [self fetch];
-    [self executeOperation: currentInstruction];
-}
-
-- (void) executeAtLocation: (uint16)loc
-{
-    pc = loc;
-    [self execute];
-}
-
-- (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc
-{
-    [ram loadProgramFile:fileName atLocation:loc];
 }
 
 - (void) runAtLocation: (uint16)loc
@@ -1100,6 +1083,18 @@ static NSString *methodsString;
 }
 
 // Instruction interpretation....
+- (void) execute
+{
+    [self fetch];
+    [self executeOperation: currentInstruction];
+}
+
+- (void) executeAtLocation: (uint16)loc
+{
+    pc = loc;
+    [self execute];
+}
+
 - (void) executeOperation: (NSNumber *)operation
 {
     NSString *methodName = [[instructionMap objectForKey:operation] objectForKey: @"methodName"];
@@ -1107,6 +1102,12 @@ static NSString *methodsString;
     SEL selector = NSSelectorFromString(methodName);
     [self performSelector:selector];
     [self step];
+}
+
+// Load
+- (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc
+{
+    [ram loadProgramFile:fileName atLocation:loc];
 }
 
 // Instruction implementations...
