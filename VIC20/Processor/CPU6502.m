@@ -707,8 +707,17 @@ static NSMutableDictionary *instructionMap;
      absolute,Y    SBC oper,Y    F9    3     4*
      (indirect,X)  SBC (oper,X)  E1    2     6
      (indirect),Y  SBC (oper),Y  F1    2     5*
-     
-     
+     */
+    [self addOpcode:0xe9 name:@"SBC" params:1 cycles:2 method:@"SBC_immediate"];
+    [self addOpcode:0xe5 name:@"SBC" params:1 cycles:3 method:@"SBC_zeropage"];
+    [self addOpcode:0xf5 name:@"SBC" params:1 cycles:4 method:@"SBC_zeropageX"];
+    [self addOpcode:0xfD name:@"SBC" params:1 cycles:4 method:@"SBC_absolute"];
+    [self addOpcode:0xfD name:@"SBC" params:1 cycles:4 method:@"SBC_absoluteX"];
+    [self addOpcode:0xf9 name:@"SBC" params:1 cycles:4 method:@"SBC_absoluteY"];
+    [self addOpcode:0xe1 name:@"SBC" params:1 cycles:6 method:@"SBC_indirectX"];
+    [self addOpcode:0xf1 name:@"SBC" params:1 cycles:5 method:@"SBC_indirectY"];
+    
+     /*
      SEC  Set Carry Flag
      
      1 -> C                           N Z C I D V
@@ -717,8 +726,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       SEC           38    1     2
-     
-     
+     */
+    [self addOpcode:0x60 name:@"SEC" params:1 cycles:5 method:@"SEC_implied"];
+
+    /*
      SED  Set Decimal Flag
      
      1 -> D                           N Z C I D V
