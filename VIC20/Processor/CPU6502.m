@@ -78,7 +78,7 @@ static NSString *methodsString;
     for(int i = 0; i < par - 1; i++)
     {
         parameterStatements = [parameterStatements stringByAppendingFormat:@"    pc++;\n"];
-        parameterStatements = [parameterStatements stringByAppendingFormat:@"    uint16 param%d = [ram read: pc];\n",i+1];
+        parameterStatements = [parameterStatements stringByAppendingFormat:@"    uint8 param%d = [ram read: pc];\n",i+1];
         parameterStatements = [parameterStatements stringByAppendingFormat:@"    NSLog(@\"param = %@\", param%d);\n",@"%x", i+1];
     }
     
@@ -1111,13 +1111,47 @@ static NSString *methodsString;
 }
 
 // Instruction implementations...
+/*
+ *  add 1 to cycles if page boundery is crossed
+ 
+ ** add 1 to cycles if branch occurs on same page
+ add 2 to cycles if branch occurs to different page
+ 
+ 
+ Legend to Flags:  + .... modified
+ - .... not modified
+ 1 .... set
+ 0 .... cleared
+ M6 .... memory bit 6
+ M7 .... memory bit 7
+ */
+
+
 /* Implementation of ADC */
+/*
+ ADC  Add Memory to Accumulator with Carry
+ 
+ A + M + C -> A, C                N Z C I D V
+ + + + - - +
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     ADC #oper     69    2     2
+ zeropage      ADC oper      65    2     3
+ zeropage,X    ADC oper,X    75    2     4
+ absolute      ADC oper      6D    3     4
+ absolute,X    ADC oper,X    7D    3     4*
+ absolute,Y    ADC oper,Y    79    3     4*
+ (indirect,X)  ADC (oper,X)  61    2     6
+ (indirect),Y  ADC (oper),Y  71    2     5*
+ */
 - (void) ADC_immediate
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
+    
 }
 
 /* Implementation of ADC */
@@ -1125,7 +1159,7 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1134,7 +1168,7 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1143,10 +1177,10 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1155,10 +1189,10 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1167,10 +1201,10 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1179,13 +1213,13 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
     pc++;
-    uint16 param3 = [ram read: pc];
+    uint8 param3 = [ram read: pc];
     NSLog(@"param = %x", param3);
 }
 
@@ -1194,13 +1228,13 @@ static NSString *methodsString;
 {
     NSLog(@"ADC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
     pc++;
-    uint16 param3 = [ram read: pc];
+    uint8 param3 = [ram read: pc];
     NSLog(@"param = %x", param3);
 }
 
@@ -1209,7 +1243,7 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1218,7 +1252,7 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1227,7 +1261,7 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1236,10 +1270,10 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1248,10 +1282,10 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1260,10 +1294,10 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1272,7 +1306,7 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1281,7 +1315,7 @@ static NSString *methodsString;
 {
     NSLog(@"AND");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1296,7 +1330,7 @@ static NSString *methodsString;
 {
     NSLog(@"ASL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1305,7 +1339,7 @@ static NSString *methodsString;
 {
     NSLog(@"ASL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1314,10 +1348,10 @@ static NSString *methodsString;
 {
     NSLog(@"ASL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1326,10 +1360,10 @@ static NSString *methodsString;
 {
     NSLog(@"ASL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1338,7 +1372,7 @@ static NSString *methodsString;
 {
     NSLog(@"BCC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1347,7 +1381,7 @@ static NSString *methodsString;
 {
     NSLog(@"BCS");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1356,7 +1390,7 @@ static NSString *methodsString;
 {
     NSLog(@"BEQ");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1365,7 +1399,7 @@ static NSString *methodsString;
 {
     NSLog(@"BIT");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1374,10 +1408,10 @@ static NSString *methodsString;
 {
     NSLog(@"BIT");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1386,7 +1420,7 @@ static NSString *methodsString;
 {
     NSLog(@"BMI");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1395,7 +1429,7 @@ static NSString *methodsString;
 {
     NSLog(@"BNE");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1404,7 +1438,7 @@ static NSString *methodsString;
 {
     NSLog(@"BPL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1419,7 +1453,7 @@ static NSString *methodsString;
 {
     NSLog(@"BVC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1428,7 +1462,7 @@ static NSString *methodsString;
 {
     NSLog(@"BVS");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1437,7 +1471,7 @@ static NSString *methodsString;
 {
     NSLog(@"CLC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1464,7 +1498,7 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1473,7 +1507,7 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1482,7 +1516,7 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1491,10 +1525,10 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1503,10 +1537,10 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1515,10 +1549,10 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1527,7 +1561,7 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1536,7 +1570,7 @@ static NSString *methodsString;
 {
     NSLog(@"CMP");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1545,7 +1579,7 @@ static NSString *methodsString;
 {
     NSLog(@"CPX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1554,7 +1588,7 @@ static NSString *methodsString;
 {
     NSLog(@"CPX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1563,10 +1597,10 @@ static NSString *methodsString;
 {
     NSLog(@"CPX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1575,7 +1609,7 @@ static NSString *methodsString;
 {
     NSLog(@"CPY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1584,7 +1618,7 @@ static NSString *methodsString;
 {
     NSLog(@"CPY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1593,10 +1627,10 @@ static NSString *methodsString;
 {
     NSLog(@"CPY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1605,7 +1639,7 @@ static NSString *methodsString;
 {
     NSLog(@"DEC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1614,7 +1648,7 @@ static NSString *methodsString;
 {
     NSLog(@"DEC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1623,10 +1657,10 @@ static NSString *methodsString;
 {
     NSLog(@"DEC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1635,10 +1669,10 @@ static NSString *methodsString;
 {
     NSLog(@"DEC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1659,7 +1693,7 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1668,7 +1702,7 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1677,7 +1711,7 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1686,10 +1720,10 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1698,10 +1732,10 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1710,10 +1744,10 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1722,7 +1756,7 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1731,7 +1765,7 @@ static NSString *methodsString;
 {
     NSLog(@"EOR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1740,7 +1774,7 @@ static NSString *methodsString;
 {
     NSLog(@"INC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1749,7 +1783,7 @@ static NSString *methodsString;
 {
     NSLog(@"INC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1758,10 +1792,10 @@ static NSString *methodsString;
 {
     NSLog(@"INC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1770,10 +1804,10 @@ static NSString *methodsString;
 {
     NSLog(@"INC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1806,10 +1840,10 @@ static NSString *methodsString;
 {
     NSLog(@"JSR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1818,7 +1852,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1827,7 +1861,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1836,7 +1870,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1845,10 +1879,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1857,10 +1891,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1869,10 +1903,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1881,7 +1915,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1890,7 +1924,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1899,7 +1933,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1908,7 +1942,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1917,7 +1951,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1926,10 +1960,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1938,10 +1972,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1950,7 +1984,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1959,7 +1993,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1968,7 +2002,7 @@ static NSString *methodsString;
 {
     NSLog(@"LDY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -1977,10 +2011,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -1989,10 +2023,10 @@ static NSString *methodsString;
 {
     NSLog(@"LDY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2001,7 +2035,7 @@ static NSString *methodsString;
 {
     NSLog(@"LSR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2010,7 +2044,7 @@ static NSString *methodsString;
 {
     NSLog(@"LSR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2019,7 +2053,7 @@ static NSString *methodsString;
 {
     NSLog(@"LSR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2028,10 +2062,10 @@ static NSString *methodsString;
 {
     NSLog(@"LSR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2040,10 +2074,10 @@ static NSString *methodsString;
 {
     NSLog(@"LSR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2058,7 +2092,7 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2067,7 +2101,7 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2076,7 +2110,7 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2085,10 +2119,10 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2097,10 +2131,10 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2109,10 +2143,10 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2121,7 +2155,7 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2130,7 +2164,7 @@ static NSString *methodsString;
 {
     NSLog(@"ORA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2169,7 +2203,7 @@ static NSString *methodsString;
 {
     NSLog(@"ROL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2178,7 +2212,7 @@ static NSString *methodsString;
 {
     NSLog(@"ROL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2187,10 +2221,10 @@ static NSString *methodsString;
 {
     NSLog(@"ROL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2199,10 +2233,10 @@ static NSString *methodsString;
 {
     NSLog(@"ROL");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2217,7 +2251,7 @@ static NSString *methodsString;
 {
     NSLog(@"ROR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2226,7 +2260,7 @@ static NSString *methodsString;
 {
     NSLog(@"ROR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2235,10 +2269,10 @@ static NSString *methodsString;
 {
     NSLog(@"ROR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2247,10 +2281,10 @@ static NSString *methodsString;
 {
     NSLog(@"ROR");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2271,7 +2305,7 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2280,7 +2314,7 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2289,7 +2323,7 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2298,10 +2332,10 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2310,10 +2344,10 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2322,10 +2356,10 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2334,7 +2368,7 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2343,7 +2377,7 @@ static NSString *methodsString;
 {
     NSLog(@"SBC");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2370,7 +2404,7 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2379,7 +2413,7 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2388,10 +2422,10 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2400,10 +2434,10 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2412,10 +2446,10 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2424,7 +2458,7 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2433,7 +2467,7 @@ static NSString *methodsString;
 {
     NSLog(@"STA");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2442,7 +2476,7 @@ static NSString *methodsString;
 {
     NSLog(@"STX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2451,7 +2485,7 @@ static NSString *methodsString;
 {
     NSLog(@"STX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2460,10 +2494,10 @@ static NSString *methodsString;
 {
     NSLog(@"STX");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
@@ -2472,7 +2506,7 @@ static NSString *methodsString;
 {
     NSLog(@"STY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2481,7 +2515,7 @@ static NSString *methodsString;
 {
     NSLog(@"STY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
 }
 
@@ -2490,10 +2524,10 @@ static NSString *methodsString;
 {
     NSLog(@"STY");
     pc++;
-    uint16 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     pc++;
-    uint16 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
 }
 
