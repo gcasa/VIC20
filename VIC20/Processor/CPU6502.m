@@ -215,7 +215,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BMI oper      30    2     2**
      */
-    [self addOpcode:0x30 name:@"BMI" params:1 cycles:7 method:@"BMI_relative"];
+    [self addOpcode:0x30 name:@"BMI" params:2 cycles:2 method:@"BMI_relative"];
 
     /*
      BNE  Branch on Result not Zero
@@ -227,7 +227,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BNE oper      D0    2     2**
      */
-    [self addOpcode:0xd0 name:@"BNE" params:1 cycles:7 method:@"BNE_relative"];
+    [self addOpcode:0xd0 name:@"BNE" params:2 cycles:2 method:@"BNE_relative"];
 
     /*
      BPL  Branch on Result Plus
@@ -239,7 +239,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BPL oper      10    2     2**
      */
-    [self addOpcode:0x10 name:@"BPL" params:1 cycles:7 method:@"BPL_relative"];
+    [self addOpcode:0x10 name:@"BPL" params:2 cycles:2 method:@"BPL_relative"];
     
     /*
      BRK  Force Break
@@ -263,7 +263,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      relative      BVC oper      50    2     2**
      */
-    [self addOpcode:0x50 name:@"BVC" params:1 cycles:7 method:@"BVC_relative"];
+    [self addOpcode:0x50 name:@"BVC" params:2 cycles:2 method:@"BVC_relative"];
 
     /*
      BVS  Branch on Overflow Set
@@ -287,7 +287,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       CLC           18    1     2
      */
-    [self addOpcode:0x18 name:@"CLC" params:1 cycles:7 method:@"CLC_implied"];
+    [self addOpcode:0x18 name:@"CLC" params:2 cycles:2 method:@"CLC_implied"];
 
     /*
      CLD  Clear Decimal Mode
@@ -299,7 +299,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       CLD           D8    1     2
      */
-    [self addOpcode:0xd8 name:@"CLD" params:1 cycles:7 method:@"CLD_implied"];
+    [self addOpcode:0xd8 name:@"CLD" params:1 cycles:2 method:@"CLD_implied"];
 
     /*
      
@@ -312,7 +312,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       CLI           58    1     2
      */
-    [self addOpcode:0x58 name:@"CLI" params:1 cycles:7 method:@"CLI_implied"];
+    [self addOpcode:0x58 name:@"CLI" params:1 cycles:2 method:@"CLI_implied"];
 
     /*
      
@@ -325,7 +325,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       CLV           B8    1     2
      */
-    [self addOpcode:0xb8 name:@"CLV" params:1 cycles:7 method:@"CLV_implied"];
+    [self addOpcode:0xb8 name:@"CLV" params:1 cycles:2 method:@"CLV_implied"];
 
     /*
      CMP  Compare Memory with Accumulator
@@ -344,14 +344,14 @@ static NSMutableDictionary *instructionMap;
      (indirect,X)  CMP (oper,X)  C1    2     6
      (indirect),Y  CMP (oper),Y  D1    2     5*
      */
-    [self addOpcode:0xc9 name:@"CMP" params:1 cycles:7 method:@"CMP_immediate"];
-    [self addOpcode:0xc5 name:@"CMP" params:1 cycles:7 method:@"CMP_zeropage"];
-    [self addOpcode:0xd5 name:@"CMP" params:1 cycles:7 method:@"CMP_zeropageX"];
-    [self addOpcode:0xcd name:@"CMP" params:1 cycles:7 method:@"CMP_absolute"];
-    [self addOpcode:0xdd name:@"CMP" params:1 cycles:7 method:@"CMP_absoluteX"];
-    [self addOpcode:0xd9 name:@"CMP" params:1 cycles:7 method:@"CMP_absoluteY"];
-    [self addOpcode:0xc1 name:@"CMP" params:1 cycles:7 method:@"CMP_indirectX"];
-    [self addOpcode:0xd1 name:@"CMP" params:1 cycles:7 method:@"CMP_indirectY"];
+    [self addOpcode:0xc9 name:@"CMP" params:2 cycles:2 method:@"CMP_immediate"];
+    [self addOpcode:0xc5 name:@"CMP" params:2 cycles:3 method:@"CMP_zeropage"];
+    [self addOpcode:0xd5 name:@"CMP" params:2 cycles:4 method:@"CMP_zeropageX"];
+    [self addOpcode:0xcd name:@"CMP" params:3 cycles:4 method:@"CMP_absolute"];
+    [self addOpcode:0xdd name:@"CMP" params:3 cycles:4 method:@"CMP_absoluteX"];
+    [self addOpcode:0xd9 name:@"CMP" params:3 cycles:4 method:@"CMP_absoluteY"];
+    [self addOpcode:0xc1 name:@"CMP" params:2 cycles:6 method:@"CMP_indirectX"];
+    [self addOpcode:0xd1 name:@"CMP" params:2 cycles:5 method:@"CMP_indirectY"];
 
     /*
      CPX  Compare Memory and Index X
@@ -364,8 +364,12 @@ static NSMutableDictionary *instructionMap;
      immidiate     CPX #oper     E0    2     2
      zeropage      CPX oper      E4    2     3
      absolute      CPX oper      EC    3     4
-     
-     
+     */
+    [self addOpcode:0xe0 name:@"CPX" params:2 cycles:2 method:@"CPX_immediate"];
+    [self addOpcode:0xe4 name:@"CPX" params:2 cycles:3 method:@"CPX_zeropage"];
+    [self addOpcode:0xec name:@"CPX" params:3 cycles:4 method:@"CPX_absolute"];
+
+    /*
      CPY  Compare Memory and Index Y
      
      Y - M                            N Z C I D V
@@ -376,8 +380,12 @@ static NSMutableDictionary *instructionMap;
      immidiate     CPY #oper     C0    2     2
      zeropage      CPY oper      C4    2     3
      absolute      CPY oper      CC    3     4
-     
-     
+     */
+    [self addOpcode:0xc0 name:@"CPY" params:2 cycles:2 method:@"CPY_immediate"];
+    [self addOpcode:0xc4 name:@"CPY" params:2 cycles:3 method:@"CPY_zeropage"];
+    [self addOpcode:0xcc name:@"CPY" params:3 cycles:4 method:@"CPY_absolute"];
+
+    /*
      DEC  Decrement Memory by One
      
      M - 1 -> M                       N Z C I D V
