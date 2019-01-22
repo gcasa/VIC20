@@ -287,7 +287,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       CLC           18    1     2
      */
-    [self addOpcode:0x50 name:@"CLC" params:1 cycles:7 method:@"CLC_implied"];
+    [self addOpcode:0x18 name:@"CLC" params:1 cycles:7 method:@"CLC_implied"];
 
     /*
      CLD  Clear Decimal Mode
@@ -298,7 +298,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       CLD           D8    1     2
-     
+     */
+    [self addOpcode:0xd8 name:@"CLD" params:1 cycles:7 method:@"CLD_implied"];
+
+    /*
      
      CLI  Clear Interrupt Disable Bit
      
@@ -308,7 +311,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       CLI           58    1     2
-     
+     */
+    [self addOpcode:0x58 name:@"CLI" params:1 cycles:7 method:@"CLI_implied"];
+
+    /*
      
      CLV  Clear Overflow Flag
      
@@ -318,8 +324,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       CLV           B8    1     2
-     
-     
+     */
+    [self addOpcode:0xb8 name:@"CLV" params:1 cycles:7 method:@"CLV_implied"];
+
+    /*
      CMP  Compare Memory with Accumulator
      
      A - M                            N Z C I D V
@@ -335,8 +343,17 @@ static NSMutableDictionary *instructionMap;
      absolute,Y    CMP oper,Y    D9    3     4*
      (indirect,X)  CMP (oper,X)  C1    2     6
      (indirect),Y  CMP (oper),Y  D1    2     5*
-     
-     
+     */
+    [self addOpcode:0xc9 name:@"CMP" params:1 cycles:7 method:@"CMP_immediate"];
+    [self addOpcode:0xc5 name:@"CMP" params:1 cycles:7 method:@"CMP_zeropage"];
+    [self addOpcode:0xd5 name:@"CMP" params:1 cycles:7 method:@"CMP_zeropageX"];
+    [self addOpcode:0xcd name:@"CMP" params:1 cycles:7 method:@"CMP_absolute"];
+    [self addOpcode:0xdd name:@"CMP" params:1 cycles:7 method:@"CMP_absoluteX"];
+    [self addOpcode:0xd9 name:@"CMP" params:1 cycles:7 method:@"CMP_absoluteY"];
+    [self addOpcode:0xc1 name:@"CMP" params:1 cycles:7 method:@"CMP_indirectX"];
+    [self addOpcode:0xd1 name:@"CMP" params:1 cycles:7 method:@"CMP_indirectY"];
+
+    /*
      CPX  Compare Memory and Index X
      
      X - M                            N Z C I D V
