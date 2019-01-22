@@ -480,8 +480,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       INX           E8    1     2
-     
-     
+     */
+    [self addOpcode:0xe8 name:@"INX" params:1 cycles:2 method:@"INX_implied"];
+
+    /*
      INY  Increment Index Y by One
      
      Y + 1 -> Y                       N Z C I D V
@@ -490,8 +492,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      implied       INY           C8    1     2
-     
-     
+    */
+    [self addOpcode:0xc8 name:@"INY" params:1 cycles:2 method:@"INY_implied"];
+
+    /*
      JMP  Jump to New Location
      
      (PC+1) -> PCL                    N Z C I D V
@@ -501,8 +505,11 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      absolute      JMP oper      4C    3     3
      indirect      JMP (oper)    6C    3     5
-     
-     
+     */
+    [self addOpcode:0x4c name:@"JMP" params:1 cycles:2 method:@"INX_absolute"];
+    [self addOpcode:0x6c name:@"JMP" params:1 cycles:2 method:@"JMP_indirect"];
+
+    /*
      JSR  Jump to New Location Saving Return Address
      
      push (PC+2),                     N Z C I D V
@@ -512,8 +519,10 @@ static NSMutableDictionary *instructionMap;
      addressing    assembler    opc  bytes  cyles
      --------------------------------------------
      absolute      JSR oper      20    3     6
-     
-     
+     */
+    [self addOpcode:0x20 name:@"JSP" params:1 cycles:2 method:@"JSR_absolute"];
+    
+    /*
      LDA  Load Accumulator with Memory
      
      M -> A                           N Z C I D V
@@ -529,8 +538,17 @@ static NSMutableDictionary *instructionMap;
      absolute,Y    LDA oper,Y    B9    3     4*
      (indirect,X)  LDA (oper,X)  A1    2     6
      (indirect),Y  LDA (oper),Y  B1    2     5*
-     
-     
+     */
+    [self addOpcode:0xa9 name:@"LDA" params:2 cycles:2 method:@"LDA_immediate"];
+    [self addOpcode:0xa5 name:@"LDA" params:2 cycles:3 method:@"LDA_zeropage"];
+    [self addOpcode:0xb5 name:@"LDA" params:2 cycles:4 method:@"LDA_zeropageX"];
+    [self addOpcode:0xad name:@"LDA" params:3 cycles:4 method:@"LDA_absolute"];
+    [self addOpcode:0xbd name:@"LDA" params:3 cycles:4 method:@"LDA_absoluteX"];
+    [self addOpcode:0xb9 name:@"LDA" params:3 cycles:4 method:@"LDA_absoluteY"];
+    [self addOpcode:0xa1 name:@"LDA" params:2 cycles:6 method:@"LDA_indirectX"];
+    [self addOpcode:0xb1 name:@"LDA" params:2 cycles:5 method:@"LDA_indirectY"];
+    
+    /*
      LDX  Load Index X with Memory
      
      M -> X                           N Z C I D V
@@ -543,8 +561,14 @@ static NSMutableDictionary *instructionMap;
      zeropage,Y    LDX oper,Y    B6    2     4
      absolute      LDX oper      AE    3     4
      absolute,Y    LDX oper,Y    BE    3     4*
-     
-     
+     */
+    [self addOpcode:0xa2 name:@"LDX" params:1 cycles:7 method:@"LDX_immediate"];
+    [self addOpcode:0xa6 name:@"LDX" params:1 cycles:7 method:@"LDX_zeropage"];
+    [self addOpcode:0xb6 name:@"LDX" params:1 cycles:7 method:@"LDX_zeropageY"];
+    [self addOpcode:0xae name:@"LDX" params:1 cycles:7 method:@"LDX_absolute"];
+    [self addOpcode:0xbe name:@"LDX" params:1 cycles:7 method:@"LDX_absoluteY"];
+    
+     /*
      LDY  Load Index Y with Memory
      
      M -> Y                           N Z C I D V
@@ -557,8 +581,14 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    LDY oper,X    B4    2     4
      absolute      LDY oper      AC    3     4
      absolute,X    LDY oper,X    BC    3     4*
-     
-     
+     */
+    [self addOpcode:0xa0 name:@"LDY" params:2 cycles:2 method:@"LDY_immediate"];
+    [self addOpcode:0xa4 name:@"LDY" params:2 cycles:3 method:@"LDY_zeropage"];
+    [self addOpcode:0xb4 name:@"LDY" params:2 cycles:4 method:@"LDY_zeropageX"];
+    [self addOpcode:0xac name:@"LDY" params:3 cycles:4 method:@"LDY_absolute"];
+    [self addOpcode:0xbc name:@"LDY" params:3 cycles:4 method:@"LDY_absoluteX"];
+
+    /*
      LSR  Shift One Bit Right (Memory or Accumulator)
      
      0 -> [76543210] -> C             N Z C I D V
@@ -571,8 +601,13 @@ static NSMutableDictionary *instructionMap;
      zeropage,X    LSR oper,X    56    2     6
      absolute      LSR oper      4E    3     6
      absolute,X    LSR oper,X    5E    3     7
-     
-     
+     */
+    [self addOpcode:0x4a name:@"LSR" params:2 cycles:2 method:@"LSR_accumulator"];
+    [self addOpcode:0x46 name:@"LSR" params:2 cycles:3 method:@"LSR_zeropage"];
+    [self addOpcode:0x56 name:@"LSR" params:2 cycles:4 method:@"LSR_zeropageX"];
+    [self addOpcode:0x4e name:@"LSR" params:3 cycles:4 method:@"LSR_absolute"];
+    [self addOpcode:0x5e name:@"LSR" params:3 cycles:4 method:@"LSR_absoluteX"];
+    /*
      NOP  No Operation
      
      ---                              N Z C I D V
@@ -582,6 +617,7 @@ static NSMutableDictionary *instructionMap;
      --------------------------------------------
      implied       NOP           EA    1     2
      */
+    [self addOpcode:0x4c name:@"NOP" params:1 cycles:2 method:@"NOP_implied"];
     
     /*
      ORA  OR Memory with Accumulator
