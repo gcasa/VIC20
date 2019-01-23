@@ -2553,6 +2553,18 @@ static NSString *methodsString;
     NSLog(@"param = %x", param1);
 }
 
+/*
+ STX  Store Index X in Memory
+ 
+ X -> M                           N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ zeropage      STX oper      86    2     3
+ zeropage,Y    STX oper,Y    96    2     4
+ absolute      STX oper      8E    3     4
+*/
 /* Implementation of STX */
 - (void) STX_zeropage
 {
@@ -2581,15 +2593,30 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+
 }
 
+/*
+ STY  Sore Index Y in Memory
+ 
+ Y -> M                           N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ zeropage      STY oper      84    2     3
+ zeropage,X    STY oper,X    94    2     4
+ absolute      STY oper      8C    3     4
+ */
 /* Implementation of STY */
 - (void) STY_zeropage
 {
-    NSLog(@"STY");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"STY $%02x", param1);
+    uint8 val = [ram read: param1];
+    y = val;
 }
 
 /* Implementation of STY */
@@ -2599,6 +2626,8 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
+    uint8 val = [ram read: param1] + x;
+    y = val;
 }
 
 /* Implementation of STY */
@@ -2611,6 +2640,9 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    y = val;
 }
 
 /*
