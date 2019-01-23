@@ -559,8 +559,8 @@ static NSString *methodsString;
      absolute      JMP oper      4C    3     3
      indirect      JMP (oper)    6C    3     5
      */
-    [self addOpcode:0x4c name:@"JMP" params:1 cycles:2 method:@"INX_absolute"];
-    [self addOpcode:0x6c name:@"JMP" params:1 cycles:2 method:@"JMP_indirect"];
+    [self addOpcode:0x4c name:@"JMP" params:3 cycles:3 method:@"JMP_absolute"];
+    [self addOpcode:0x6c name:@"JMP" params:3 cycles:5 method:@"JMP_indirect"];
 
     /*
      JSR  Jump to New Location Saving Return Address
@@ -1853,15 +1853,27 @@ static NSString *methodsString;
 }
 
 /* Implementation of JMP */
-- (void) INX_absolute
+- (void) JMP_absolute
 {
     NSLog(@"JMP");
+    pc++;
+    uint8 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint8 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
 }
 
 /* Implementation of JMP */
 - (void) JMP_indirect
 {
     NSLog(@"JMP");
+    pc++;
+    uint8 param1 = [ram read: pc];
+    NSLog(@"param = %x", param1);
+    pc++;
+    uint8 param2 = [ram read: pc];
+    NSLog(@"param = %x", param2);
 }
 
 /* Implementation of JSR */
