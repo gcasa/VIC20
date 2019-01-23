@@ -28,6 +28,7 @@
     
     // Flags...
     BOOL s;
+    BOOL n;
     BOOL v;
     BOOL b;
     BOOL d;

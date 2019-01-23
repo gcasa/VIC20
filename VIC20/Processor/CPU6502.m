@@ -1127,7 +1127,6 @@ static NSString *methodsString;
  */
 
 
-/* Implementation of ADC */
 /*
  ADC  Add Memory to Accumulator with Carry
  
@@ -1145,14 +1144,16 @@ static NSString *methodsString;
  (indirect,X)  ADC (oper,X)  61    2     6
  (indirect),Y  ADC (oper),Y  71    2     5*
  */
+/* Implementation of ADC */
 - (void) ADC_immediate
 {
-    NSLog(@"ADC");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
-    
-    a = 
+    NSLog(@"%04x ADC #%02x",pc - 1, param1);
+    c = param1 & 0x80;
+    n = param1 & 0x80;
+    a = a + param1;
+    z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1161,7 +1162,12 @@ static NSString *methodsString;
     NSLog(@"ADC");
     pc++;
     uint8 param1 = [ram read: pc];
+    uint8 val = [ram read: param1];
     NSLog(@"param = %x", param1);
+    c = val & 0x80;
+    n = val & 0x80;
+    a = a + val;
+    z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1170,7 +1176,12 @@ static NSString *methodsString;
     NSLog(@"ADC");
     pc++;
     uint8 param1 = [ram read: pc];
+    uint8 val = [ram read: param1 + x];
     NSLog(@"param = %x", param1);
+    c = val & 0x80;
+    n = val & 0x80;
+    a = a + val;
+    z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1240,6 +1251,23 @@ static NSString *methodsString;
 }
 
 /* Implementation of AND */
+/*
+ AND  AND Memory with Accumulator
+ 
+ A AND M -> A                     N Z C I D V
+                                  + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     AND #oper     29    2     2
+ zeropage      AND oper      25    2     3
+ zeropage,X    AND oper,X    35    2     4
+ absolute      AND oper      2D    3     4
+ absolute,X    AND oper,X    3D    3     4*
+ absolute,Y    AND oper,Y    39    3     4*
+ (indirect,X)  AND (oper,X)  21    2     6
+ (indirect),Y  AND (oper),Y  31    2     5*
+ */
 - (void) AND_immediate
 {
     NSLog(@"AND");
