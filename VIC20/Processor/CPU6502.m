@@ -1862,6 +1862,8 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    NSLog(@"addr = %x", addr);
 }
 
 /* Implementation of JMP */
@@ -1874,6 +1876,12 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    NSLog(@"addr = %x", addr);
+    uint8 p1 = [ram read: addr];
+    uint8 p2 = [ram read: addr + 1];
+    uint16 naddr = ((uint16)p2 << 8) + (uint16)p1;
+    pc = naddr; // Set new location.
 }
 
 /* Implementation of JSR */
@@ -1886,6 +1894,9 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    NSLog(@"addr = %x", addr);
+    pc = addr; // Set new location.
 }
 
 /* Implementation of LDA */
