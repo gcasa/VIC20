@@ -2613,39 +2613,105 @@ static NSString *methodsString;
     NSLog(@"param = %x", param2);
 }
 
+/*
+ TAX  Transfer Accumulator to Index X
+ 
+ A -> X                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       TAX           AA    1     2
+ */
 /* Implementation of TAX */
 - (void) TAX_implied
 {
     NSLog(@"TAX");
+    x = a;
 }
 
+/*
+ TAY  Transfer Accumulator to Index Y
+ 
+ A -> Y                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       TAY           A8    1     2
+ */
 /* Implementation of TAY */
 - (void) TAY_implied
 {
     NSLog(@"TAY");
+    y = a;
 }
 
+/*
+ TSX  Transfer Stack Pointer to Index X
+ 
+ SP -> X                          N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       TSX           BA    1     2
+ */
 /* Implementation of TSX */
 - (void) TSX_implied
 {
     NSLog(@"TSX");
+    x = sp;
 }
 
+/*
+ TXA  Transfer Index X to Accumulator
+ 
+ X -> A                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       TXA           8A    1     2
+ */
 /* Implementation of TXA */
 - (void) TXA_implied
 {
     NSLog(@"TXA");
+    a = x
 }
 
+/*
+ TXS  Transfer Index X to Stack Register
+ 
+ X -> SP                          N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       TXS           9A    1     2
+ */
 /* Implementation of TXS */
 - (void) TXS_implied
 {
     NSLog(@"TXS");
+    sr = x;
 }
 
+/*
+ TYA  Transfer Index Y to Accumulator
+ 
+ Y -> A                           N Z C I D V
+                                  + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       TYA           98    1     2
+*/
 /* Implementation of TYA */
 - (void) TYA_implied
 {
     NSLog(@"TYA");
+    y = a;
 }
 @end
