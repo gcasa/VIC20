@@ -1132,7 +1132,7 @@ static NSString *methodsString;
  ADC  Add Memory to Accumulator with Carry
  
  A + M + C -> A, C                N Z C I D V
- + + + - - +
+                                  + + + - - +
  
  addressing    assembler    opc  bytes  cyles
  --------------------------------------------
@@ -1152,6 +1152,7 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
     
+    a = 
 }
 
 /* Implementation of ADC */
