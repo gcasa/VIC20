@@ -1880,22 +1880,30 @@ static NSString *methodsString;
     NSLog(@"addr = %x", addr);
     uint8 p1 = [ram read: addr];
     uint8 p2 = [ram read: addr + 1];
-    uint16 naddr = ((uint16)p2 << 8) + (uint16)p1;
+    uint16 naddr = ((uint16)p2 << 8) + (uint16)p1;  // indirect address...
     pc = naddr; // Set new location.
 }
 
+/*
+ JSR  Jump to New Location Saving Return Address
+ 
+ push (PC+2),                     N Z C I D V
+ (PC+1) -> PCL                    - - - - - -
+ (PC+2) -> PCH
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ absolute      JSR oper      20    3     6
+ */
 /* Implementation of JSR */
 - (void) JSR_absolute
 {
-    NSLog(@"JSR");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"addr = %x", addr);
+    NSLog(@"JSR $%04x", addr);
     pc = addr; // Set new location.
 }
 
@@ -1906,6 +1914,7 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     NSLog(@"param = %x", param1);
+    a = param1;
 }
 
 /* Implementation of LDA */
@@ -1983,28 +1992,25 @@ static NSString *methodsString;
 /* Implementation of LDX */
 - (void) LDX_immediate
 {
-    NSLog(@"LDX");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"LDA #%x", param1);
 }
 
 /* Implementation of LDX */
 - (void) LDX_zeropage
 {
-    NSLog(@"LDX");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"LDA $%02x", param1);
 }
 
 /* Implementation of LDX */
 - (void) LDX_zeropageY
 {
-    NSLog(@"LDX");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"LDA $%x,Y", param1);
 }
 
 /* Implementation of LDX */
@@ -2082,6 +2088,20 @@ static NSString *methodsString;
     NSLog(@"param = %x", param2);
 }
 
+/*
+ LSR  Shift One Bit Right (Memory or Accumulator)
+ 
+ 0 -> [76543210] -> C             N Z C I D V
+                                  - + + - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ accumulator   LSR A         4A    1     2
+ zeropage      LSR oper      46    2     5
+ zeropage,X    LSR oper,X    56    2     6
+ absolute      LSR oper      4E    3     6
+ absolute,X    LSR oper,X    5E    3     7
+ */
 /* Implementation of LSR */
 - (void) LSR_accumulator
 {
@@ -2133,10 +2153,20 @@ static NSString *methodsString;
     NSLog(@"param = %x", param2);
 }
 
+/*
+ NOP  No Operation
+ 
+ ---                              N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       NOP           EA    1     2
+ */
 /* Implementation of NOP */
 - (void) NOP_implied
 {
-    NSLog(@"NOP");
+    NSLog(@"NOP");  // literally does nothing...
 }
 
 /* Implementation of ORA */
