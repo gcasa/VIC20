@@ -895,7 +895,7 @@ static NSString *methodsString;
     [self addOpcode:0x9d name:@"STA" params:3 cycles:5 method:@"STA_absoluteX"];
     [self addOpcode:0x99 name:@"STA" params:3 cycles:5 method:@"STA_absoluteY"];
     [self addOpcode:0x81 name:@"STA" params:2 cycles:6 method:@"STA_indirectX"];
-    [self addOpcode:0x91 name:@"STA" params:2 cycles:6 method:@"STA_inderectY"];
+    [self addOpcode:0x91 name:@"STA" params:2 cycles:6 method:@"STA_indirectY"];
 
     /*
      STX  Store Index X in Memory
@@ -2481,58 +2481,73 @@ static NSString *methodsString;
     NSLog(@"SEI");
 }
 
+/*
+ STA  Store Accumulator in Memory
+ 
+ A -> M                           N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ zeropage      STA oper      85    2     3
+ zeropage,X    STA oper,X    95    2     4
+ absolute      STA oper      8D    3     4
+ absolute,X    STA oper,X    9D    3     5
+ absolute,Y    STA oper,Y    99    3     5
+ (indirect,X)  STA (oper,X)  81    2     6
+ (indirect),Y  STA (oper),Y  91    2     6
+ */
 /* Implementation of STA */
 - (void) STA_zeropage
 {
-    NSLog(@"STA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"STA #%02x", param1);
+    [ram write:a loc:param1];
 }
 
 /* Implementation of STA */
 - (void) STA_zeropageX
 {
-    NSLog(@"STA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"STA #%02x,X", param1);
+    [ram write:a loc:param1 + x];
 }
 
 /* Implementation of STA */
 - (void) STA_absolute
 {
-    NSLog(@"STA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [ram write:a loc:addr];
 }
 
 /* Implementation of STA */
 - (void) STA_absoluteX
 {
-    NSLog(@"STA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    NSLog(@"STA $%04x,X", addr);
+    [ram write:a loc:addr + x];
 }
 
 /* Implementation of STA */
 - (void) STA_absoluteY
 {
-    NSLog(@"STA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    NSLog(@"STA $%04x,Y", addr);
+    [ram write:a loc:addr + y];
 }
 
 /* Implementation of STA */
@@ -2545,7 +2560,7 @@ static NSString *methodsString;
 }
 
 /* Implementation of STA */
-- (void) STA_inderectY
+- (void) STA_indirectY
 {
     NSLog(@"STA");
     pc++;
@@ -2568,33 +2583,32 @@ static NSString *methodsString;
 /* Implementation of STX */
 - (void) STX_zeropage
 {
-    NSLog(@"STX");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"STX $%02x", param1);
+    [ram write:x loc:param1];
 }
 
 /* Implementation of STX */
 - (void) STX_zeropageY
 {
-    NSLog(@"STX");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    NSLog(@"STY $%02x,Y", param1);
+    [ram write:x loc:param1 + y];
+
 }
 
 /* Implementation of STX */
 - (void) STX_absolute
 {
-    NSLog(@"STX");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-
+    NSLog(@"STX $%04x", addr);
+    [ram write:x loc:addr];
 }
 
 /*
@@ -2615,34 +2629,28 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     NSLog(@"STY $%02x", param1);
-    uint8 val = [ram read: param1];
-    y = val;
+    [ram write:y loc:param1];
 }
 
 /* Implementation of STY */
 - (void) STY_zeropageX
 {
-    NSLog(@"STY");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
-    uint8 val = [ram read: param1] + x;
-    y = val;
+    NSLog(@"STY $%02x,X", param1);
+    [ram write:x loc:param1 + x];
 }
 
 /* Implementation of STY */
 - (void) STY_absolute
 {
-    NSLog(@"STY");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    uint8 val = [ram read: addr];
-    y = val;
+    NSLog(@"STY $%04x", addr);
+    [ram write:y loc:addr];
 }
 
 /*
@@ -2710,7 +2718,7 @@ static NSString *methodsString;
 - (void) TXA_implied
 {
     NSLog(@"TXA");
-    a = x
+    a = x;
 }
 
 /*
