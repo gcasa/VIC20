@@ -1001,7 +1001,7 @@ static NSString *methodsString;
      */
     [self addOpcode:0x98 name:@"TYA" params:1 cycles:2 method:@"TYA_implied"];
 
-    [self generateMethods];  /* Used to generate the method calls for each instruction */
+    // [self generateMethods];  /* Used to generate the method calls for each instruction */
     NSLog(@"####### Finished initializing CPU");
 }
 
@@ -1100,7 +1100,9 @@ static NSString *methodsString;
     NSString *methodName = [[instructionMap objectForKey:operation] objectForKey: @"methodName"];
     // NSLog(@"methodName = %@",methodName);
     SEL selector = NSSelectorFromString(methodName);
-    [self performSelector:selector];
+    IMP imp = [self methodForSelector:selector];
+    void (*func)(id, SEL) = (void *)imp;
+    func(self, selector);
     [self step];
 }
 
@@ -1348,6 +1350,20 @@ static NSString *methodsString;
     NSLog(@"param = %x", param1);
 }
 
+/*
+ ASL  Shift Left One Bit (Memory or Accumulator)
+ 
+ C <- [76543210] <- 0             N Z C I D V
+                                  + + + - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ accumulator   ASL A         0A    1     2
+ zeropage      ASL oper      06    2     5
+ zeropage,X    ASL oper,X    16    2     6
+ absolute      ASL oper      0E    3     6
+ absolute,X    ASL oper,X    1E    3     7
+ */
 /* Implementation of ASL */
 - (void) ASL_accumulator
 {
