@@ -1112,7 +1112,6 @@ static NSString *methodsString;
 - (void) executeOperation: (NSNumber *)operation
 {
     NSString *methodName = [[instructionMap objectForKey:operation] objectForKey: @"methodName"];
-    // [self debugLogWithFormat:@"methodName = %@",methodName);
     SEL selector = NSSelectorFromString(methodName);
     IMP imp = [self methodForSelector:selector];
     void (*func)(id, SEL) = (void *)imp;
@@ -1246,9 +1245,6 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
-    pc++;
-    uint8 param3 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param3];
 }
 
 /* Implementation of ADC */
@@ -1261,9 +1257,6 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
-    pc++;
-    uint8 param3 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param3];
 }
 
 /* Implementation of AND */
@@ -1382,24 +1375,32 @@ static NSString *methodsString;
 - (void) ASL_accumulator
 {
     [self debugLogWithFormat:@"ASL"];
+    a = a << 1;
+    z = !(a);
 }
 
 /* Implementation of ASL */
 - (void) ASL_zeropage
 {
-    [self debugLogWithFormat:@"ASL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"ASL $%X", param1];
+    uint8 val = [ram read: param1];
+    uint8 r = val << 1;
+    z = !(r);
+    [ram write:r loc: param1];
 }
 
 /* Implementation of ASL */
 - (void) ASL_zeropageX
 {
-    [self debugLogWithFormat:@"ASL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"ASL $%X,X", param1];
+    uint8 val = [ram read: param1 + x];
+    uint8 r = val << 1;
+    z = !(r);
+    [ram write:r loc: param1];
 }
 
 /* Implementation of ASL */
@@ -2205,7 +2206,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"param = %02X", param1];
 }
 
 /* Implementation of ORA */
@@ -2214,7 +2215,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"param = %02X", param1];
 }
 
 /* Implementation of ORA */
@@ -2223,7 +2224,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"param = %02X", param1];
 }
 
 /* Implementation of ORA */
