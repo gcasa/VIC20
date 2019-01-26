@@ -22,15 +22,15 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            shouldBeEnabled = "Yes"
+            shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VIC20/Processor/CPU6502.m"
-            timestampString = "570089394.850842"
+            timestampString = "570184238.168578"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1917"
-            endingLineNumber = "1917"
+            startingLineNumber = "1931"
+            endingLineNumber = "1931"
             landmarkName = "-JSR_absolute"
             landmarkType = "7">
          </BreakpointContent>

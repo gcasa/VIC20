@@ -79,7 +79,7 @@ static NSString *methodsString;
     {
         parameterStatements = [parameterStatements stringByAppendingFormat:@"    pc++;\n"];
         parameterStatements = [parameterStatements stringByAppendingFormat:@"    uint8 param%d = [ram read: pc];\n",i+1];
-        parameterStatements = [parameterStatements stringByAppendingFormat:@"    NSLog(@\"param = %@\", param%d);\n",@"%x", i+1];
+        parameterStatements = [parameterStatements stringByAppendingFormat:@"    [self debugLogWithFormat:@\"param = %@\", param%d);\n",@"%X", i+1];
     }
     
     // Build method....
@@ -87,7 +87,7 @@ static NSString *methodsString;
                     @"/* Implementation of %@ */\n"
                     @"- (void) %@\n"
                     @"{\n"
-                    @"    NSLog(@\"%@\");\n"
+                    @"    [self debugLogWithFormat:@\"%@\"];\n"
                     @"%@"
                     @"}\n",name, mname,
                         name, parameterStatements];
@@ -1002,7 +1002,7 @@ static NSString *methodsString;
     [self addOpcode:0x98 name:@"TYA" params:1 cycles:2 method:@"TYA_implied"];
 
     // [self generateMethods];  /* Used to generate the method calls for each instruction */
-    NSLog(@"####### Finished initializing CPU");
+    NSLog(@"####### Finished");
 }
 
 + (void) initialize
@@ -1016,8 +1016,22 @@ static NSString *methodsString;
     {
         [self reset];
         ram = [[RAM alloc] initWithSize: size];
+        debug = YES;
     }
     return self;
+}
+
+- (void)debugLogWithFormat: (NSString *)formatString,...
+{
+    if(debug)
+    {
+        NSString *contents = nil;
+        va_list args;
+        va_start(args, formatString);
+        contents = [[NSString alloc] initWithFormat:formatString arguments:args];
+        NSLog(@"%@",contents);
+        va_end(args);
+    }
 }
 
 - (void) reset
@@ -1098,7 +1112,7 @@ static NSString *methodsString;
 - (void) executeOperation: (NSNumber *)operation
 {
     NSString *methodName = [[instructionMap objectForKey:operation] objectForKey: @"methodName"];
-    // NSLog(@"methodName = %@",methodName);
+    // [self debugLogWithFormat:@"methodName = %@",methodName);
     SEL selector = NSSelectorFromString(methodName);
     IMP imp = [self methodForSelector:selector];
     void (*func)(id, SEL) = (void *)imp;
@@ -1151,7 +1165,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"%04x ADC #%02x",pc - 1, param1);
+    [self debugLogWithFormat:@"%04x ADC #%02x",pc - 1, param1];
     c = param1 & 0x80;
     n = param1 & 0x80;
     a = a + param1;
@@ -1161,11 +1175,11 @@ static NSString *methodsString;
 /* Implementation of ADC */
 - (void) ADC_zeropage
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
     uint8 val = [ram read: param1];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     c = val & 0x80;
     n = val & 0x80;
     a = a + val;
@@ -1175,11 +1189,11 @@ static NSString *methodsString;
 /* Implementation of ADC */
 - (void) ADC_zeropageX
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
     uint8 val = [ram read: param1 + x];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     c = val & 0x80;
     n = val & 0x80;
     a = a + val;
@@ -1189,67 +1203,67 @@ static NSString *methodsString;
 /* Implementation of ADC */
 - (void) ADC_absolute
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ADC */
 - (void) ADC_absoluteX
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ADC */
 - (void) ADC_absoluteY
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ADC */
 - (void) ADC_indirectX
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
     pc++;
     uint8 param3 = [ram read: pc];
-    NSLog(@"param = %x", param3);
+    [self debugLogWithFormat:@"param = %X", param3];
 }
 
 /* Implementation of ADC */
 - (void) ADC_indirectY
 {
-    NSLog(@"ADC");
+    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
     pc++;
     uint8 param3 = [ram read: pc];
-    NSLog(@"param = %x", param3);
+    [self debugLogWithFormat:@"param = %X", param3];
 }
 
 /* Implementation of AND */
@@ -1272,82 +1286,82 @@ static NSString *methodsString;
  */
 - (void) AND_immediate
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of AND */
 - (void) AND_zeropage
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of AND */
 - (void) AND_zeropageX
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of AND */
 - (void) AND_absolute
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of AND */
 - (void) AND_absoluteX
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of AND */
 - (void) AND_absoluteY
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of AND */
 - (void) AND_indirectX
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of AND */
 - (void) AND_indirectY
 {
-    NSLog(@"AND");
+    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /*
@@ -1367,533 +1381,533 @@ static NSString *methodsString;
 /* Implementation of ASL */
 - (void) ASL_accumulator
 {
-    NSLog(@"ASL");
+    [self debugLogWithFormat:@"ASL"];
 }
 
 /* Implementation of ASL */
 - (void) ASL_zeropage
 {
-    NSLog(@"ASL");
+    [self debugLogWithFormat:@"ASL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ASL */
 - (void) ASL_zeropageX
 {
-    NSLog(@"ASL");
+    [self debugLogWithFormat:@"ASL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ASL */
 - (void) ASL_absolute
 {
-    NSLog(@"ASL");
+    [self debugLogWithFormat:@"ASL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ASL */
 - (void) ASL_absoluteX
 {
-    NSLog(@"ASL");
+    [self debugLogWithFormat:@"ASL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of BCC */
 - (void) BCC_relative
 {
-    NSLog(@"BCC");
+    [self debugLogWithFormat:@"BCC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BCS */
 - (void) BCS_relative
 {
-    NSLog(@"BCS");
+    [self debugLogWithFormat:@"BCS"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BEQ */
 - (void) BEQ_relative
 {
-    NSLog(@"BEQ");
+    [self debugLogWithFormat:@"BEQ"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BIT */
 - (void) BIT_zeropage
 {
-    NSLog(@"BIT");
+    [self debugLogWithFormat:@"BIT"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BIT */
 - (void) BIT_absolute
 {
-    NSLog(@"BIT");
+    [self debugLogWithFormat:@"BIT"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of BMI */
 - (void) BMI_relative
 {
-    NSLog(@"BMI");
+    [self debugLogWithFormat:@"BMI"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BNE */
 - (void) BNE_relative
 {
-    NSLog(@"BNE");
+    [self debugLogWithFormat:@"BNE"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BPL */
 - (void) BPL_relative
 {
-    NSLog(@"BPL");
+    [self debugLogWithFormat:@"BPL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BRK */
 - (void) BRK_implied
 {
-    NSLog(@"BRK");
+    [self debugLogWithFormat:@"BRK"];
 }
 
 /* Implementation of BVC */
 - (void) BVC_relative
 {
-    NSLog(@"BVC");
+    [self debugLogWithFormat:@"BVC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of BVS */
 - (void) BVS_relative
 {
-    NSLog(@"BVS");
+    [self debugLogWithFormat:@"BVS"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CLC */
 - (void) CLC_implied
 {
-    NSLog(@"CLC");
+    [self debugLogWithFormat:@"CLC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CLD */
 - (void) CLD_implied
 {
-    NSLog(@"CLD");
+    [self debugLogWithFormat:@"CLD"];
 }
 
 /* Implementation of CLI */
 - (void) CLI_implied
 {
-    NSLog(@"CLI");
+    [self debugLogWithFormat:@"CLI"];
 }
 
 /* Implementation of CLV */
 - (void) CLV_implied
 {
-    NSLog(@"CLV");
+    [self debugLogWithFormat:@"CLV"];
 }
 
 /* Implementation of CMP */
 - (void) CMP_immediate
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CMP */
 - (void) CMP_zeropage
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CMP */
 - (void) CMP_zeropageX
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CMP */
 - (void) CMP_absolute
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of CMP */
 - (void) CMP_absoluteX
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of CMP */
 - (void) CMP_absoluteY
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of CMP */
 - (void) CMP_indirectX
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CMP */
 - (void) CMP_indirectY
 {
-    NSLog(@"CMP");
+    [self debugLogWithFormat:@"CMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CPX */
 - (void) CPX_immediate
 {
-    NSLog(@"CPX");
+    [self debugLogWithFormat:@"CPX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CPX */
 - (void) CPX_zeropage
 {
-    NSLog(@"CPX");
+    [self debugLogWithFormat:@"CPX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CPX */
 - (void) CPX_absolute
 {
-    NSLog(@"CPX");
+    [self debugLogWithFormat:@"CPX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of CPY */
 - (void) CPY_immediate
 {
-    NSLog(@"CPY");
+    [self debugLogWithFormat:@"CPY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CPY */
 - (void) CPY_zeropage
 {
-    NSLog(@"CPY");
+    [self debugLogWithFormat:@"CPY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of CPY */
 - (void) CPY_absolute
 {
-    NSLog(@"CPY");
+    [self debugLogWithFormat:@"CPY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of DEC */
 - (void) DEC_zeropage
 {
-    NSLog(@"DEC");
+    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of DEC */
 - (void) DEC_zeropageX
 {
-    NSLog(@"DEC");
+    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of DEC */
 - (void) DEC_absolute
 {
-    NSLog(@"DEC");
+    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of DEC */
 - (void) DEC_absoluteX
 {
-    NSLog(@"DEC");
+    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of DEX */
 - (void) DEX_implied
 {
-    NSLog(@"DEX");
+    [self debugLogWithFormat:@"DEX"];
 }
 
 /* Implementation of DEY */
 - (void) DEY_implied
 {
-    NSLog(@"DEY");
+    [self debugLogWithFormat:@"DEY"];
 }
 
 /* Implementation of EOR */
 - (void) EOR_immediate
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of EOR */
 - (void) EOR_zeropage
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of EOR */
 - (void) EOR_zeropageX
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of EOR */
 - (void) EOR_absolute
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of EOR */
 - (void) EOR_absoluteX
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of EOR */
 - (void) EOR_absoluteY
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of EOR */
 - (void) EOR_indirectX
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of EOR */
 - (void) EOR_indirectY
 {
-    NSLog(@"EOR");
+    [self debugLogWithFormat:@"EOR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of INC */
 - (void) INC_zeropage
 {
-    NSLog(@"INC");
+    [self debugLogWithFormat:@"INC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of INC */
 - (void) INC_zeropageX
 {
-    NSLog(@"INC");
+    [self debugLogWithFormat:@"INC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of INC */
 - (void) INC_absolute
 {
-    NSLog(@"INC");
+    [self debugLogWithFormat:@"INC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of INC */
 - (void) INC_absoluteX
 {
-    NSLog(@"INC");
+    [self debugLogWithFormat:@"INC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of INX */
 - (void) INX_implied
 {
-    NSLog(@"INX");
+    [self debugLogWithFormat:@"INX"];
 }
 
 /* Implementation of INY */
 - (void) INY_implied
 {
-    NSLog(@"INY");
+    [self debugLogWithFormat:@"INY"];
 }
 
 /* Implementation of JMP */
 - (void) JMP_absolute
 {
-    NSLog(@"JMP");
+    [self debugLogWithFormat:@"JMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"addr = %x", addr);
+    [self debugLogWithFormat:@"addr = %X", addr];
 }
 
 /* Implementation of JMP */
 - (void) JMP_indirect
 {
-    NSLog(@"JMP");
+    [self debugLogWithFormat:@"JMP"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"addr = %x", addr);
+    [self debugLogWithFormat:@"addr = %X", addr];
     uint8 p1 = [ram read: addr];
     uint8 p2 = [ram read: addr + 1];
     uint16 naddr = ((uint16)p2 << 8) + (uint16)p1;  // indirect address...
@@ -1919,90 +1933,90 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"JSR $%04x", addr);
+    [self debugLogWithFormat:@"JSR $%04X", addr];
     pc = addr; // Set new location.
 }
 
 /* Implementation of LDA */
 - (void) LDA_immediate
 {
-    NSLog(@"LDA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"LDA #%X", param1];
     a = param1;
 }
 
 /* Implementation of LDA */
 - (void) LDA_zeropage
 {
-    NSLog(@"LDA");
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
+    uint8 val = [ram read: param1];
+    a = val;
 }
 
 /* Implementation of LDA */
 - (void) LDA_zeropageX
 {
-    NSLog(@"LDA");
+    [self debugLogWithFormat:@"LDA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LDA */
 - (void) LDA_absolute
 {
-    NSLog(@"LDA");
+    [self debugLogWithFormat:@"LDA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LDA */
 - (void) LDA_absoluteX
 {
-    NSLog(@"LDA");
+    [self debugLogWithFormat:@"LDA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LDA */
 - (void) LDA_absoluteY
 {
-    NSLog(@"LDA");
+    [self debugLogWithFormat:@"LDA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LDA */
 - (void) LDA_indirectX
 {
-    NSLog(@"LDA");
+    [self debugLogWithFormat:@"LDA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LDA */
 - (void) LDA_indirectY
 {
-    NSLog(@"LDA");
+    [self debugLogWithFormat:@"LDA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LDX */
@@ -2010,7 +2024,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"LDA #%x", param1);
+    [self debugLogWithFormat:@"LDA #%X", param1];
 }
 
 /* Implementation of LDX */
@@ -2018,7 +2032,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"LDA $%02x", param1);
+    [self debugLogWithFormat:@"LDA $%02x", param1];
 }
 
 /* Implementation of LDX */
@@ -2026,82 +2040,82 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"LDA $%x,Y", param1);
+    [self debugLogWithFormat:@"LDA $%X,Y", param1];
 }
 
 /* Implementation of LDX */
 - (void) LDX_absolute
 {
-    NSLog(@"LDX");
+    [self debugLogWithFormat:@"LDX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LDX */
 - (void) LDX_absoluteY
 {
-    NSLog(@"LDX");
+    [self debugLogWithFormat:@"LDX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LDY */
 - (void) LDY_immediate
 {
-    NSLog(@"LDY");
+    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LDY */
 - (void) LDY_zeropage
 {
-    NSLog(@"LDY");
+    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LDY */
 - (void) LDY_zeropageX
 {
-    NSLog(@"LDY");
+    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LDY */
 - (void) LDY_absolute
 {
-    NSLog(@"LDY");
+    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LDY */
 - (void) LDY_absoluteX
 {
-    NSLog(@"LDY");
+    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /*
@@ -2121,52 +2135,52 @@ static NSString *methodsString;
 /* Implementation of LSR */
 - (void) LSR_accumulator
 {
-    NSLog(@"LSR");
+    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LSR */
 - (void) LSR_zeropage
 {
-    NSLog(@"LSR");
+    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LSR */
 - (void) LSR_zeropageX
 {
-    NSLog(@"LSR");
+    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of LSR */
 - (void) LSR_absolute
 {
-    NSLog(@"LSR");
+    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of LSR */
 - (void) LSR_absoluteX
 {
-    NSLog(@"LSR");
+    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /*
@@ -2182,319 +2196,319 @@ static NSString *methodsString;
 /* Implementation of NOP */
 - (void) NOP_implied
 {
-    NSLog(@"NOP");  // literally does nothing...
+    [self debugLogWithFormat:@"NOP"];  // literally does nothing...
 }
 
 /* Implementation of ORA */
 - (void) ORA_immediate
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ORA */
 - (void) ORA_zeropage
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ORA */
 - (void) ORA_zeropageX
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ORA */
 - (void) ORA_absolute
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ORA */
 - (void) ORA_absoluteX
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ORA */
 - (void) ORA_absoluteY
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ORA */
 - (void) ORA_indirectX
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ORA */
 - (void) ORA_indirectY
 {
-    NSLog(@"ORA");
+    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of PHA */
 - (void) PHA_implied
 {
-    NSLog(@"PHA");
+    [self debugLogWithFormat:@"PHA"];
 }
 
 /* Implementation of PHP */
 - (void) PHP_implied
 {
-    NSLog(@"PHP");
+    [self debugLogWithFormat:@"PHP"];
 }
 
 /* Implementation of PLA */
 - (void) PLA_implied
 {
-    NSLog(@"PLA");
+    [self debugLogWithFormat:@"PLA"];
 }
 
 /* Implementation of PLP */
 - (void) PLP_implied
 {
-    NSLog(@"PLP");
+    [self debugLogWithFormat:@"PLP"];
 }
 
 /* Implementation of ROL */
 - (void) ROL_accumulator
 {
-    NSLog(@"ROL");
+    [self debugLogWithFormat:@"ROL"];
 }
 
 /* Implementation of ROL */
 - (void) ROL_zeropage
 {
-    NSLog(@"ROL");
+    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ROL */
 - (void) ROL_zeropageX
 {
-    NSLog(@"ROL");
+    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ROL */
 - (void) ROL_absolute
 {
-    NSLog(@"ROL");
+    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ROL */
 - (void) ROL_absoluteX
 {
-    NSLog(@"ROL");
+    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ROR */
 - (void) ROR_accumulator
 {
-    NSLog(@"ROR");
+    [self debugLogWithFormat:@"ROR"];
 }
 
 /* Implementation of ROR */
 - (void) ROR_zeropage
 {
-    NSLog(@"ROR");
+    [self debugLogWithFormat:@"ROR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ROR */
 - (void) ROR_zeropageX
 {
-    NSLog(@"ROR");
+    [self debugLogWithFormat:@"ROR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of ROR */
 - (void) ROR_absolute
 {
-    NSLog(@"ROR");
+    [self debugLogWithFormat:@"ROR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of ROR */
 - (void) ROR_absoluteX
 {
-    NSLog(@"ROR");
+    [self debugLogWithFormat:@"ROR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of RTI */
 - (void) RTI_implied
 {
-    NSLog(@"RTI");
+    [self debugLogWithFormat:@"RTI"];
 }
 
 /* Implementation of RTS */
 - (void) RTS_implied
 {
-    NSLog(@"RTS");
+    [self debugLogWithFormat:@"RTS"];
 }
 
 /* Implementation of SBC */
 - (void) SBC_immediate
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of SBC */
 - (void) SBC_zeropage
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of SBC */
 - (void) SBC_zeropageX
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of SBC */
 - (void) SBC_absolute
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of SBC */
 - (void) SBC_absoluteX
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of SBC */
 - (void) SBC_absoluteY
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    NSLog(@"param = %x", param2);
+    [self debugLogWithFormat:@"param = %X", param2];
 }
 
 /* Implementation of SBC */
 - (void) SBC_indirectX
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of SBC */
 - (void) SBC_indirectY
 {
-    NSLog(@"SBC");
+    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of SEC */
 - (void) SEC_implied
 {
-    NSLog(@"SEC");
+    [self debugLogWithFormat:@"SEC"];
 }
 
 /* Implementation of SED */
 - (void) SED_implied
 {
-    NSLog(@"SED");
+    [self debugLogWithFormat:@"SED"];
 }
 
 /* Implementation of SEI */
 - (void) SEI_implied
 {
-    NSLog(@"SEI");
+    [self debugLogWithFormat:@"SEI"];
 }
 
 /*
@@ -2518,7 +2532,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"STA #%02x", param1);
+    [self debugLogWithFormat:@"STA #%02x", param1];
     [ram write:a loc:param1];
 }
 
@@ -2527,7 +2541,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"STA #%02x,X", param1);
+    [self debugLogWithFormat:@"STA #%02x,X", param1];
     [ram write:a loc:param1 + x];
 }
 
@@ -2550,7 +2564,7 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"STA $%04x,X", addr);
+    [self debugLogWithFormat:@"STA $%04x,X", addr];
     [ram write:a loc:addr + x];
 }
 
@@ -2562,26 +2576,26 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"STA $%04x,Y", addr);
+    [self debugLogWithFormat:@"STA $%04x,Y", addr];
     [ram write:a loc:addr + y];
 }
 
 /* Implementation of STA */
 - (void) STA_indirectX
 {
-    NSLog(@"STA");
+    [self debugLogWithFormat:@"STA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /* Implementation of STA */
 - (void) STA_indirectY
 {
-    NSLog(@"STA");
+    [self debugLogWithFormat:@"STA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"param = %x", param1);
+    [self debugLogWithFormat:@"param = %X", param1];
 }
 
 /*
@@ -2601,7 +2615,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"STX $%02x", param1);
+    [self debugLogWithFormat:@"STX $%02x", param1];
     [ram write:x loc:param1];
 }
 
@@ -2610,7 +2624,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"STY $%02x,Y", param1);
+    [self debugLogWithFormat:@"STY $%02x,Y", param1];
     [ram write:x loc:param1 + y];
 
 }
@@ -2623,7 +2637,7 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"STX $%04x", addr);
+    [self debugLogWithFormat:@"STX $%04x", addr];
     [ram write:x loc:addr];
 }
 
@@ -2644,7 +2658,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"STY $%02x", param1);
+    [self debugLogWithFormat:@"STY $%02x", param1];
     [ram write:y loc:param1];
 }
 
@@ -2653,7 +2667,7 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    NSLog(@"STY $%02x,X", param1);
+    [self debugLogWithFormat:@"STY $%02x,X", param1];
     [ram write:x loc:param1 + x];
 }
 
@@ -2665,7 +2679,7 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    NSLog(@"STY $%04x", addr);
+    [self debugLogWithFormat:@"STY $%04x", addr];
     [ram write:y loc:addr];
 }
 
@@ -2682,7 +2696,7 @@ static NSString *methodsString;
 /* Implementation of TAX */
 - (void) TAX_implied
 {
-    NSLog(@"TAX");
+    [self debugLogWithFormat:@"TAX"];
     x = a;
 }
 
@@ -2699,7 +2713,7 @@ static NSString *methodsString;
 /* Implementation of TAY */
 - (void) TAY_implied
 {
-    NSLog(@"TAY");
+    [self debugLogWithFormat:@"TAY"];
     y = a;
 }
 
@@ -2716,7 +2730,7 @@ static NSString *methodsString;
 /* Implementation of TSX */
 - (void) TSX_implied
 {
-    NSLog(@"TSX");
+    [self debugLogWithFormat:@"TSX"];
     x = sp;
 }
 
@@ -2733,7 +2747,7 @@ static NSString *methodsString;
 /* Implementation of TXA */
 - (void) TXA_implied
 {
-    NSLog(@"TXA");
+    [self debugLogWithFormat:@"TXA"];
     a = x;
 }
 
@@ -2750,7 +2764,7 @@ static NSString *methodsString;
 /* Implementation of TXS */
 - (void) TXS_implied
 {
-    NSLog(@"TXS");
+    [self debugLogWithFormat:@"TXS"];
     sr = x;
 }
 
@@ -2767,7 +2781,7 @@ static NSString *methodsString;
 /* Implementation of TYA */
 - (void) TYA_implied
 {
-    NSLog(@"TYA");
+    [self debugLogWithFormat:@"TYA"];
     y = a;
 }
 @end

@@ -39,6 +39,8 @@
     // Memory...
     RAM *ram;
     
+    BOOL debug;
+    
     // Current instruction
     NSNumber *currentInstruction;
 }
