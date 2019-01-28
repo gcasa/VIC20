@@ -1533,13 +1533,34 @@ static NSString *methodsString;
     }
 }
 
+/*
+ BIT  Test Bits in Memory with Accumulator
+ 
+ bits 7 and 6 of operand are transfered to bit 7 and 6 of SR (N,V);
+ the zeroflag is set to the result of operand AND accumulator.
+ 
+ A AND M, M7 -> N, M6 -> V        N Z C I D V
+ M7 + - - - M6
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ zeropage      BIT oper      24    2     3
+ absolute      BIT oper      2C    3     4
+ */
 /* Implementation of BIT */
 - (void) BIT_zeropage
 {
     [self debugLogWithFormat:@"BIT"];
     pc++;
     uint8 param1 = [ram read: pc];
+    uint8 val = [ram read: param1];
     [self debugLogWithFormat:@"param = %X", param1];
+    uint8 m6 = val & 0x40; // bit 6
+    uint8 m7 = val & 0x80; // bit 7
+    a = a & val;
+    s.status.z = !(a);
+    s.status.n = m7;
+    s.status.v = m6;
 }
 
 /* Implementation of BIT */
@@ -1552,8 +1573,27 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    [self debugLogWithFormat:@"param = %X", param1];
+    uint8 m6 = val & 0x40; // bit 6
+    uint8 m7 = val & 0x80; // bit 7
+    a = a & val;
+    s.status.z = !(a);
+    s.status.n = m7;
+    s.status.v = m6;
 }
 
+/*
+ BMI  Branch on Result Minus
+ 
+ branch on N = 1                  N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ relative      BMI oper      30    2     2**
+ */
 /* Implementation of BMI */
 - (void) BMI_relative
 {
@@ -1567,6 +1607,16 @@ static NSString *methodsString;
     }
 }
 
+/*
+ BNE  Branch on Result not Zero
+ 
+ branch on Z = 0                  N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ relative      BNE oper      D0    2     2**
+ */
 /* Implementation of BNE */
 - (void) BNE_relative
 {
@@ -1580,6 +1630,16 @@ static NSString *methodsString;
     }
 }
 
+/*
+ BPL  Branch on Result Plus
+ 
+ branch on N = 0                  N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ relative      BPL oper      10    2     2**
+ */
 /* Implementation of BPL */
 - (void) BPL_relative
 {
@@ -1593,12 +1653,32 @@ static NSString *methodsString;
     }
 }
 
+/*
+ BRK  Force Break
+ 
+ interrupt,                       N Z C I D V
+ push PC+2, push SR               - - - 1 - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       BRK           00    1     7
+ */
 /* Implementation of BRK */
 - (void) BRK_implied
 {
     [self debugLogWithFormat:@"BRK"];
 }
 
+/*
+ BVC  Branch on Overflow Clear
+ 
+ branch on V = 0                  N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ relative      BVC oper      50    2     2**
+ */
 /* Implementation of BVC */
 - (void) BVC_relative
 {
@@ -1612,6 +1692,16 @@ static NSString *methodsString;
     }
 }
 
+/*
+ BVS  Branch on Overflow Set
+ 
+ branch on V = 1                  N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ relative      BVC oper      70    2     2**
+ */
 /* Implementation of BVS */
 - (void) BVS_relative
 {
@@ -1625,6 +1715,16 @@ static NSString *methodsString;
     }
 }
 
+/*
+ CLC  Clear Carry Flag
+ 
+ 0 -> C                           N Z C I D V
+ - - 0 - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       CLC           18    1     2
+ */
 /* Implementation of CLC */
 - (void) CLC_implied
 {
@@ -1632,6 +1732,16 @@ static NSString *methodsString;
     s.status.c = 0;
 }
 
+/*
+ CLD  Clear Decimal Mode
+ 
+ 0 -> D                           N Z C I D V
+ - - - - 0 -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       CLD           D8    1     2
+ */
 /* Implementation of CLD */
 - (void) CLD_implied
 {
@@ -1640,6 +1750,16 @@ static NSString *methodsString;
 
 }
 
+/*
+ CLI  Clear Interrupt Disable Bit
+ 
+ 0 -> I                           N Z C I D V
+ - - - 0 - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       CLI           58    1     2
+ */
 /* Implementation of CLI */
 - (void) CLI_implied
 {
@@ -1647,6 +1767,16 @@ static NSString *methodsString;
     s.status.i = 0;
 }
 
+/*
+ CLV  Clear Overflow Flag
+ 
+ 0 -> V                           N Z C I D V
+ - - - - - 0
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       CLV           B8    1     2
+ */
 /* Implementation of CLV */
 - (void) CLV_implied
 {
@@ -1669,6 +1799,8 @@ static NSString *methodsString;
     {
         s.status.z = 1;
     }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CMP */
@@ -1686,6 +1818,8 @@ static NSString *methodsString;
     {
         s.status.z = 1;
     }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CMP */
@@ -1703,6 +1837,8 @@ static NSString *methodsString;
     {
         s.status.z = 1;
     }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CMP */
@@ -1725,6 +1861,8 @@ static NSString *methodsString;
     {
         s.status.z = 1;
     }
+    s.status.n = val & 0x80;
+    s.status.c = val & 0x80;
 }
 
 /* Implementation of CMP */
@@ -1748,7 +1886,8 @@ static NSString *methodsString;
     {
         s.status.z = 1;
     }
-
+    s.status.n = val & 0x80;
+    s.status.c = val & 0x80;
 }
 
 /* Implementation of CMP */
@@ -1772,7 +1911,8 @@ static NSString *methodsString;
     {
         s.status.z = 1;
     }
-
+    s.status.n = val & 0x80;
+    s.status.c = val & 0x80;
 }
 
 /* Implementation of CMP */
