@@ -15,26 +15,30 @@
 #define RESETVECTOR 0xFFFC  // 0xFFFC - 0xFFFD
 #define IRQVECTOR   0xFFFE  // 0xFFFE - 0xFFFF
 
+struct status {
+    unsigned int c:1;
+    unsigned int z:1;
+    unsigned int unused:1;
+    unsigned int i:1;
+    unsigned int d:1;
+    unsigned int b:1;
+    unsigned int v:1;
+    unsigned int n:1;
+};
+
+
 @interface CPU6502 : NSObject
 {
     // Registers...
-    uint8 a;
-    uint8 x;
-    uint8 y;
-    uint16 pc;
-    uint8 p;
-    uint8 sp;
-    uint8 sr;
-    
-    // Flags...
-    BOOL s;
-    BOOL n;
-    BOOL v;
-    BOOL b;
-    BOOL d;
-    BOOL i;
-    BOOL z;
-    BOOL c;
+    uint8  a;   // Accumulator
+    uint8  x;   // X register
+    uint8  y;   // Y register
+    uint16 pc;  // Program counter
+    uint8  sp;  // stack pointer
+    union {
+        struct status status; // status register...
+        uint8 sr;
+    } s;
     
     // Memory...
     RAM *ram;
@@ -45,21 +49,28 @@
     NSNumber *currentInstruction;
 }
 
+// Initialize with memory...
 - (id) initWithSize: (NSUInteger)size;
 
+// Reset/Interrupt...
 - (void) reset;
 - (void) interrupt;
 
+// Instruction fetch and interpret...
 - (void) fetch;
 - (void) execute;
 - (void) executeAtLocation: (uint16)loc;
 - (void) executeOperation: (NSNumber *)operation;
 - (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc;
 - (void) runAtLocation: (uint16)loc;
+
+// Run...
 - (void) run;
 - (void) step;
-    
 - (void) state;
-- (void) tick;
+
+// Stack...
+- (void) push: (uint8)value;
+- (uint8) pop;
 
 @end

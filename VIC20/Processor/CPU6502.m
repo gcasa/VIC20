@@ -1041,22 +1041,21 @@ static NSString *methodsString;
     x  = 0x00;
     y  = 0x00;
     pc = 0x00;
-    p  = 0x00;
     sp = 0x00;
-    sr = 0xFF;
     
     // Initialize flags...
-    s  = NO;
-    b  = NO;
-    d  = NO;
-    i  = NO;
-    z  = NO;
-    c  = NO;
+    s.status.n  = 0;
+    s.status.v  = 0;
+    s.status.b  = 0;
+    s.status.d  = 0;
+    s.status.i  = 0;
+    s.status.z  = 0;
+    s.status.c  = 0;
 }
 
 - (void) interrupt
 {
-    i = YES;
+    s.status.i = YES;
 }
 
 - (void) fetch
@@ -1074,6 +1073,7 @@ static NSString *methodsString;
     {
         [self execute];
     }
+    [self state];
 }
 
 - (void) run
@@ -1088,12 +1088,9 @@ static NSString *methodsString;
 
 - (void) state
 {
-    NSLog(@"A = %08x, X = %08x, Y = %08x, PC = %08x, P = %08x, SP = %08x", a, x, y, pc, p, sp);
-}
-
-- (void) tick
-{
-    
+    NSLog(@"A = %02x, X = %02x, Y = %02x, PC = %04x, SP = %02x", a, x, y, pc, sp);
+    NSLog(@"N     V      B     D     I     Z      C");
+    NSLog(@"%d    %d     %d    %d    %d    %d     %d", s.status.n, s.status.v, s.status.b, s.status.d, s.status.i, s.status.z, s.status.c);
 }
 
 // Instruction interpretation....
@@ -1123,6 +1120,33 @@ static NSString *methodsString;
 - (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc
 {
     [ram loadProgramFile:fileName atLocation:loc];
+}
+
+// Stack
+- (void) push: (uint8)value
+{
+    [ram write: value loc:(STACKBASE + sp)];
+    if(sp == 0x00)
+    {
+        sp = 0xFF;
+    }
+    else
+    {
+        sp--;
+    }
+}
+
+- (uint8) pop
+{
+    if(sp == 0xFF)
+    {
+        sp = 0x00;
+    }
+    else
+    {
+        sp++;
+    }
+    return [ram read:(STACKBASE + sp)];
 }
 
 // Instruction implementations...
@@ -1165,10 +1189,10 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"%04x ADC #%02x",pc - 1, param1];
-    c = param1 & 0x80;
-    n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
+    s.status.n = param1 & 0x80;
     a = a + param1;
-    z = !(a);
+    s.status.z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1179,10 +1203,10 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     uint8 val = [ram read: param1];
     [self debugLogWithFormat:@"param = %X", param1];
-    c = val & 0x80;
-    n = val & 0x80;
+    s.status.c = val & 0x80;
+    s.status.n = val & 0x80;
     a = a + val;
-    z = !(a);
+    s.status.z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1193,10 +1217,10 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     uint8 val = [ram read: param1 + x];
     [self debugLogWithFormat:@"param = %X", param1];
-    c = val & 0x80;
-    n = val & 0x80;
+    s.status.c = val & 0x80;
+    s.status.n = val & 0x80;
     a = a + val;
-    z = !(a);
+    s.status.z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1376,7 +1400,7 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"ASL"];
     a = a << 1;
-    z = !(a);
+    s.status.z = !(a);
 }
 
 /* Implementation of ASL */
@@ -1387,7 +1411,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"ASL $%X", param1];
     uint8 val = [ram read: param1];
     uint8 r = val << 1;
-    z = !(r);
+    s.status.z = !(r);
     [ram write:r loc: param1];
 }
 
@@ -1399,7 +1423,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"ASL $%X,X", param1];
     uint8 val = [ram read: param1 + x];
     uint8 r = val << 1;
-    z = !(r);
+    s.status.z = !(r);
     [ram write:r loc: param1];
 }
 
@@ -1413,6 +1437,11 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    uint8 r = val << 1;
+    s.status.z = !(r);
+    [ram write:r loc:addr];
 }
 
 /* Implementation of ASL */
@@ -1425,6 +1454,11 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr + x];
+    uint8 r = val << 1;
+    s.status.z = !(r);
+    [ram write:r loc: addr];
 }
 
 /* Implementation of BCC */
@@ -1432,8 +1466,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BCC"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(!s.status.c)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BCS */
@@ -1441,8 +1479,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BCS"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(s.status.c)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BEQ */
@@ -1450,8 +1492,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BEQ"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(s.status.z)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BIT */
@@ -1489,8 +1535,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BNE"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(!s.status.z)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BPL */
@@ -1895,6 +1945,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     [self debugLogWithFormat:@"addr = %X", addr];
+    pc = addr;
 }
 
 /* Implementation of JMP */
@@ -2766,7 +2817,7 @@ static NSString *methodsString;
 - (void) TXS_implied
 {
     [self debugLogWithFormat:@"TXS"];
-    sr = x;
+    sp = x;
 }
 
 /*
