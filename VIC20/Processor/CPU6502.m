@@ -1116,12 +1116,12 @@ static NSString *methodsString;
         IMP imp = [self methodForSelector:selector];
         void (*func)(id, SEL) = (void *)imp;
         func(self, selector);
-        [self step];
     }
     else
     {
-        NSLog(@"Illegal instruction.  OPCODE = %@", operation);
+        NSLog(@"Illegal instruction.  OPCODE = %@ @ PC = %04X", operation, pc);
     }
+    [self step];
 }
 
 // Load
