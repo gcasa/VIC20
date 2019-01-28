@@ -1108,12 +1108,20 @@ static NSString *methodsString;
 
 - (void) executeOperation: (NSNumber *)operation
 {
-    NSString *methodName = [[instructionMap objectForKey:operation] objectForKey: @"methodName"];
-    SEL selector = NSSelectorFromString(methodName);
-    IMP imp = [self methodForSelector:selector];
-    void (*func)(id, SEL) = (void *)imp;
-    func(self, selector);
-    [self step];
+    NSDictionary *opDict = [instructionMap objectForKey:operation];
+    if(opDict != nil)
+    {
+        NSString *methodName = [opDict objectForKey: @"methodName"];
+        SEL selector = NSSelectorFromString(methodName);
+        IMP imp = [self methodForSelector:selector];
+        void (*func)(id, SEL) = (void *)imp;
+        func(self, selector);
+        [self step];
+    }
+    else
+    {
+        NSLog(@"Illegal instruction.  OPCODE = %@", operation);
+    }
 }
 
 // Load

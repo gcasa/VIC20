@@ -26,11 +26,11 @@
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "VIC20/Processor/CPU6502.m"
-            timestampString = "570345922.151898"
+            timestampString = "570348421.864387"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "1983"
-            endingLineNumber = "1983"
+            startingLineNumber = "2068"
+            endingLineNumber = "2068"
             landmarkName = "-JSR_absolute"
             landmarkType = "7">
          </BreakpointContent>
