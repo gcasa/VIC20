@@ -340,7 +340,7 @@ static NSString *methodsString;
      --------------------------------------------
      implied       CLC           18    1     2
      */
-    [self addOpcode:0x18 name:@"CLC" params:2 cycles:2 method:@"CLC_implied"];
+    [self addOpcode:0x18 name:@"CLC" params:1 cycles:2 method:@"CLC_implied"];
 
     /*
      CLD  Clear Decimal Mode
@@ -1526,8 +1526,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BMI"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(s.status.n == 1)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BNE */
@@ -1548,8 +1552,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BPL"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(s.status.n == 0)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BRK */
@@ -1563,8 +1571,12 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BVC"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(s.status.v == 0)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of BVS */
@@ -1572,35 +1584,41 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"BVS"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    int8_t param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(s.status.v == 1)
+    {
+        pc += param1;
+    }
 }
 
 /* Implementation of CLC */
 - (void) CLC_implied
 {
     [self debugLogWithFormat:@"CLC"];
-    pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    s.status.c = 0;
 }
 
 /* Implementation of CLD */
 - (void) CLD_implied
 {
     [self debugLogWithFormat:@"CLD"];
+    s.status.d = 0;
+
 }
 
 /* Implementation of CLI */
 - (void) CLI_implied
 {
     [self debugLogWithFormat:@"CLI"];
+    s.status.i = 0;
 }
 
 /* Implementation of CLV */
 - (void) CLV_implied
 {
     [self debugLogWithFormat:@"CLV"];
+    s.status.v = 0;
 }
 
 /* Implementation of CMP */
@@ -1610,6 +1628,14 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(a == param1)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
 }
 
 /* Implementation of CMP */
@@ -1619,6 +1645,14 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(a == param1)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
 }
 
 /* Implementation of CMP */
@@ -1626,8 +1660,16 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"CMP"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc] + x;
     [self debugLogWithFormat:@"param = %X", param1];
+    if(a == param1)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
 }
 
 /* Implementation of CMP */
@@ -1640,6 +1682,16 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    if(a == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
 }
 
 /* Implementation of CMP */
@@ -1652,6 +1704,18 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr] + x;
+    if(a == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+
 }
 
 /* Implementation of CMP */
@@ -1664,6 +1728,18 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr] + y;
+    if(a == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+
 }
 
 /* Implementation of CMP */
