@@ -1959,6 +1959,18 @@ static NSString *methodsString;
     s.status.c = val & 0x80;
 }
 
+/*
+ CPX  Compare Memory and Index X
+ 
+ X - M                            N Z C I D V
+ + + + - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     CPX #oper     E0    2     2
+ zeropage      CPX oper      E4    2     3
+ absolute      CPX oper      EC    3     4
+ */
 /* Implementation of CPX */
 - (void) CPX_immediate
 {
@@ -2000,14 +2012,12 @@ static NSString *methodsString;
 /* Implementation of CPX */
 - (void) CPX_absolute
 {
-    [self debugLogWithFormat:@"CPX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"CPX $%04X",addr];
     uint8 val = [ram read: addr];
     if(x == val)
     {
@@ -2021,88 +2031,174 @@ static NSString *methodsString;
     s.status.c = val & 0x80;
 }
 
+/*
+ CPY  Compare Memory and Index Y
+ 
+ Y - M                            N Z C I D V
+ + + + - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     CPY #oper     C0    2     2
+ zeropage      CPY oper      C4    2     3
+ absolute      CPY oper      CC    3     4
+ */
 /* Implementation of CPY */
 - (void) CPY_immediate
 {
-    [self debugLogWithFormat:@"CPY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"CPY #%02X", param1];
+    if(y == param1)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CPY */
 - (void) CPY_zeropage
 {
-    [self debugLogWithFormat:@"CPY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    uint8 val = [ram read: param1];
+    [self debugLogWithFormat:@"CPY $%02X", param1];
+    if(y == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CPY */
 - (void) CPY_absolute
 {
-    [self debugLogWithFormat:@"CPY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    [self debugLogWithFormat:@"CPY $%04X", param1];
+    if(y == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
+/*
+ DEC  Decrement Memory by One
+ 
+ M - 1 -> M                       N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ zeropage      DEC oper      C6    2     5
+ zeropage,X    DEC oper,X    D6    2     6
+ absolute      DEC oper      CE    3     3
+ absolute,X    DEC oper,X    DE    3     7
+ */
 /* Implementation of DEC */
 - (void) DEC_zeropage
 {
-    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"DEC $%02X", param1];
+    uint8 val = [ram read: param1];
+    val = val - 1;
+    [ram write: val loc:param1];
+    s.status.n = val & 0x80;
+    s.status.z = !(val);
 }
 
 /* Implementation of DEC */
 - (void) DEC_zeropageX
 {
-    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"DEC $%02X", param1];
+    uint8 val = [ram read: param1 + x];
+    val = val - 1;
+    [ram write: val loc:param1 + x];
+    s.status.n = val & 0x80;
+    s.status.z = !(val);
 }
 
 /* Implementation of DEC */
 - (void) DEC_absolute
 {
-    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"DEC $%04X", addr];
+    uint8 val = [ram read: addr];
+    val = val - 1;
+    [ram write: val loc:addr];
+    s.status.n = val & 0x80;
+    s.status.z = !(val);
 }
 
 /* Implementation of DEC */
 - (void) DEC_absoluteX
 {
-    [self debugLogWithFormat:@"DEC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"DEC $%04X", addr];
+    uint8 val = [ram read: addr + x];
+    val = val - 1;
+    [ram write: val loc:addr + x];
+    s.status.n = val & 0x80;
+    s.status.z = !(val);
 }
 
+/*
+ DEX  Decrement Index X by One
+ 
+ X - 1 -> X                       N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       DEC           CA    1     2
+ */
 /* Implementation of DEX */
 - (void) DEX_implied
 {
     [self debugLogWithFormat:@"DEX"];
+    x = x - 1;
+    s.status.n = x & 0x80;
+    s.status.z = !(x);
 }
 
 /* Implementation of DEY */
 - (void) DEY_implied
 {
     [self debugLogWithFormat:@"DEY"];
+    y = y - 1;
+    s.status.n = y & 0x80;
+    s.status.z = !(y);
 }
 
 /* Implementation of EOR */
@@ -2240,6 +2336,17 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"INY"];
 }
 
+/*
+ JMP  Jump to New Location
+ 
+ (PC+1) -> PCL                    N Z C I D V
+ (PC+2) -> PCH                    - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ absolute      JMP oper      4C    3     3
+ indirect      JMP (oper)    6C    3     5
+ */
 /* Implementation of JMP */
 - (void) JMP_absolute
 {
@@ -2297,6 +2404,23 @@ static NSString *methodsString;
     pc = addr; // Set new location.
 }
 
+/*
+ LDA  Load Accumulator with Memory
+ 
+ M -> A                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     LDA #oper     A9    2     2
+ zeropage      LDA oper      A5    2     3
+ zeropage,X    LDA oper,X    B5    2     4
+ absolute      LDA oper      AD    3     4
+ absolute,X    LDA oper,X    BD    3     4*
+ absolute,Y    LDA oper,Y    B9    3     4*
+ (indirect,X)  LDA (oper,X)  A1    2     6
+ (indirect),Y  LDA (oper),Y  B1    2     5*
+ */
 /* Implementation of LDA */
 - (void) LDA_immediate
 {
