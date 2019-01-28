@@ -1877,7 +1877,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
 
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    uint8 val = [ram read: addr] + x;
+    uint8 val = [ram read: addr + x];
     if(a == val)
     {
         s.status.z = 0;
@@ -1902,7 +1902,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
     
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    uint8 val = [ram read: addr] + y;
+    uint8 val = [ram read: addr + y];
     if(a == val)
     {
         s.status.z = 0;
@@ -1920,8 +1920,21 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"CMP"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc] + x;
     [self debugLogWithFormat:@"param = %X", param1];
+    uint8 p2 = param1 + x + 1;
+    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    if(a == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = val & 0x80;
+    s.status.c = val & 0x80;
 }
 
 /* Implementation of CMP */
@@ -1929,8 +1942,21 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"CMP"];
     pc++;
-    uint8 param1 = [ram read: pc];
+    uint8 param1 = [ram read: pc] + y;
     [self debugLogWithFormat:@"param = %X", param1];
+    uint8 p2 = param1 + y + 1;
+    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    if(a == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = val & 0x80;
+    s.status.c = val & 0x80;
 }
 
 /* Implementation of CPX */
@@ -1940,6 +1966,16 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(x == param1)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CPX */
@@ -1949,6 +1985,16 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    if(x == param1)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = param1 & 0x80;
+    s.status.c = param1 & 0x80;
 }
 
 /* Implementation of CPX */
@@ -1961,6 +2007,18 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    if(x == val)
+    {
+        s.status.z = 0;
+    }
+    else
+    {
+        s.status.z = 1;
+    }
+    s.status.n = val & 0x80;
+    s.status.c = val & 0x80;
 }
 
 /* Implementation of CPY */
