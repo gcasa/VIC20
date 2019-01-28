@@ -2039,7 +2039,8 @@ static NSString *methodsString;
     uint8 p1 = [ram read: addr];
     uint8 p2 = [ram read: addr + 1];
     uint16 naddr = ((uint16)p2 << 8) + (uint16)p1;  // indirect address...
-    pc = naddr; // Set new location.
+    int8_t offset = [ram read: naddr];
+    pc += offset; // Set new location.
 }
 
 /*
