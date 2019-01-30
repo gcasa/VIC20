@@ -1234,32 +1234,29 @@ static NSString *methodsString;
 /* Implementation of ADC */
 - (void) ADC_absolute
 {
-    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"ADC $%04X", addr];
     uint8 val = [ram read: addr];
     a = a + val;
     s.status.c = a & 0x80;
     s.status.n = a & 0x80;
     s.status.z = !(a);
+}
 
 /* Implementation of ADC */
 - (void) ADC_absoluteX
 {
-    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr + x];
+    [self debugLogWithFormat:@"ADC $%04X,X", addr];
     a = a + val;
     s.status.c = a & 0x80;
     s.status.n = a & 0x80;
