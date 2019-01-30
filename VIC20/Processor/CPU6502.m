@@ -1200,34 +1200,34 @@ static NSString *methodsString;
     s.status.c = param1 & 0x80;
     s.status.n = param1 & 0x80;
     a = a + param1;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
     s.status.z = !(a);
 }
 
 /* Implementation of ADC */
 - (void) ADC_zeropage
 {
-    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
     uint8 val = [ram read: param1];
-    [self debugLogWithFormat:@"param = %X", param1];
-    s.status.c = val & 0x80;
-    s.status.n = val & 0x80;
+    [self debugLogWithFormat:@"ADC $%02X", param1];
     a = a + val;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
     s.status.z = !(a);
 }
 
 /* Implementation of ADC */
 - (void) ADC_zeropageX
 {
-    [self debugLogWithFormat:@"ADC"];
     pc++;
     uint8 param1 = [ram read: pc];
     uint8 val = [ram read: param1 + x];
-    [self debugLogWithFormat:@"param = %X", param1];
-    s.status.c = val & 0x80;
-    s.status.n = val & 0x80;
+    [self debugLogWithFormat:@"ADC ($%02X),X", param1];
     a = a + val;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
     s.status.z = !(a);
 }
 
@@ -1243,10 +1243,10 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr];
-    s.status.c = val & 0x80;
-    s.status.n = val & 0x80;
     a = a + val;
-    s.status.z = !(a);}
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 
 /* Implementation of ADC */
 - (void) ADC_absoluteX
@@ -1260,9 +1260,9 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr + x];
-    s.status.c = val & 0x80;
-    s.status.n = val & 0x80;
     a = a + val;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
     s.status.z = !(a);
 }
 
@@ -1278,9 +1278,9 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr + y];
-    s.status.c = val & 0x80;
-    s.status.n = val & 0x80;
     a = a + val;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
     s.status.z = !(a);
 }
 
@@ -1291,9 +1291,13 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
-    pc++;
-    uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint8 p2 = param1 + x + 1;
+    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    a = a + val;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ADC */
@@ -1303,9 +1307,13 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
-    pc++;
-    uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint8 p2 = param1 + y + 1;
+    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    a = a + val;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of AND */
@@ -1333,6 +1341,9 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
     a = a & param1;
+    s.status.c = a & 0x80;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of AND */
