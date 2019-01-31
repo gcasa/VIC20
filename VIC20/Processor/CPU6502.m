@@ -1338,7 +1338,6 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
     a = a & param1;
-    s.status.c = a & 0x80;
     s.status.n = a & 0x80;
     s.status.z = !(a);
 }
@@ -1352,6 +1351,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param1];
     uint8 val = [ram read: param1];
     a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of AND */
@@ -1363,6 +1364,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param1];
     uint8 val = [ram read: param1 + x];
     a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of AND */
@@ -1378,6 +1381,8 @@ static NSString *methodsString;
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr];
     a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of AND */
@@ -1392,21 +1397,24 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr + x];
-    a = a & val;}
+    a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
+}
 
 /* Implementation of AND */
 - (void) AND_absoluteY
 {
-    [self debugLogWithFormat:@"AND"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"AND $%04X,X",addr];
     uint8 val = [ram read: addr + y];
     a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 /* Implementation of AND */
 - (void) AND_indirectX
@@ -1419,6 +1427,8 @@ static NSString *methodsString;
     uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr + x];
     a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of AND */
@@ -1432,6 +1442,8 @@ static NSString *methodsString;
     uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
     uint8 val = [ram read: addr + y];
     a = a & val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /*
@@ -2521,6 +2533,7 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self push: pc + 1];
     [self debugLogWithFormat:@"JSR $%04X", addr];
     pc = addr; // Set new location.
 }
@@ -2549,6 +2562,8 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"LDA #%X", param1];
     a = param1;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2559,6 +2574,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA $%02X", param1];
     uint8 val = [ram read: param1];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2569,6 +2586,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA $%02X,X", param1];
     uint8 val = [ram read: param1 + x];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2582,6 +2601,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA $%04X", addr];
     uint8 val = [ram read: addr];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2595,6 +2616,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA $%04X,X", addr + x];
     uint8 val = [ram read: addr];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2608,6 +2631,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA $%04X,Y", addr + y];
     uint8 val = [ram read: addr];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2621,6 +2646,8 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA ($%04X,X)", addr + x];
     uint8 val = [ram read: addr];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of LDA */
@@ -2634,14 +2661,33 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"LDA ($%04X),Y", addr + y];
     uint8 val = [ram read: addr];
     a = val;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
+/*
+ LDX  Load Index X with Memory
+ 
+ M -> X                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     LDX #oper     A2    2     2
+ zeropage      LDX oper      A6    2     3
+ zeropage,Y    LDX oper,Y    B6    2     4
+ absolute      LDX oper      AE    3     4
+ absolute,Y    LDX oper,Y    BE    3     4*
+ */
 /* Implementation of LDX */
 - (void) LDX_immediate
 {
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"LDX #%X", param1];
+    x = param1;
+    s.status.n = x & 0x80;
+    s.status.z = !(x);
 }
 
 /* Implementation of LDX */
@@ -2649,7 +2695,11 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"LDX $%02x", param1];
+    [self debugLogWithFormat:@"LDX $%02X", param1];
+    uint8 val = [ram read: param1];
+    x = val;
+    s.status.n = x & 0x80;
+    s.status.z = !(x);
 }
 
 /* Implementation of LDX */
@@ -2657,33 +2707,57 @@ static NSString *methodsString;
 {
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"LDA $%X,Y", param1];
+    [self debugLogWithFormat:@"LDX $%02X,Y", param1];
+    uint8 val = [ram read: param1 + y];
+    x = val;
+    s.status.n = x & 0x80;
+    s.status.z = !(x);
 }
 
 /* Implementation of LDX */
 - (void) LDX_absolute
 {
-    [self debugLogWithFormat:@"LDX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"LDX $%04X", addr];
+    uint8 val = [ram read: addr];
+    x = val;
+    s.status.n = x & 0x80;
+    s.status.z = !(x);
 }
 
 /* Implementation of LDX */
 - (void) LDX_absoluteY
 {
-    [self debugLogWithFormat:@"LDX"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"LDX $%04X", addr];
+    uint8 val = [ram read: addr];
+    x = val;
+    s.status.n = x & 0x80;
+    s.status.z = !(x);
 }
 
+/*
+ LDY  Load Index Y with Memory
+ 
+ M -> Y                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     LDY #oper     A0    2     2
+ zeropage      LDY oper      A4    2     3
+ zeropage,X    LDY oper,X    B4    2     4
+ absolute      LDY oper      AC    3     4
+ absolute,X    LDY oper,X    BC    3     4*
+ */
 /* Implementation of LDY */
 - (void) LDY_immediate
 {
@@ -2691,48 +2765,60 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    s.status.n = y & 0x80;
+    s.status.z = !(y);
 }
 
 /* Implementation of LDY */
 - (void) LDY_zeropage
 {
-    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"LDY #%02X", param1];
+    y = param1;
+    s.status.n = y & 0x80;
+    s.status.z = !(y);
 }
 
 /* Implementation of LDY */
 - (void) LDY_zeropageX
 {
-    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"LDY $%02X,X", param1];
+    y = param1;
+    s.status.n = y & 0x80;
+    s.status.z = !(y);
 }
 
 /* Implementation of LDY */
 - (void) LDY_absolute
 {
-    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"LDY $%04X", addr];
+    uint8 val = [ram read: addr];
+    y = val;
+    s.status.n = y & 0x80;
+    s.status.z = !(y);
 }
 
 /* Implementation of LDY */
 - (void) LDY_absoluteX
 {
-    [self debugLogWithFormat:@"LDY"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"LDY $%04X", addr];
+    uint8 val = [ram read: addr];
+    y = val;
+    s.status.n = y & 0x80;
+    s.status.z = !(y);
 }
 
 /*
