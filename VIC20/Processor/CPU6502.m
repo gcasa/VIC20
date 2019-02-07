@@ -1197,8 +1197,6 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"%04x ADC #%02x",pc - 1, param1];
-    s.status.c = param1 & 0x80;
-    s.status.n = param1 & 0x80;
     a = a + param1;
     s.status.c = a & 0x80;
     s.status.n = a & 0x80;
@@ -2843,48 +2841,66 @@ static NSString *methodsString;
 {
     [self debugLogWithFormat:@"LSR"];
     a = a >> 1;
+    s.status.z = !(a);
+    s.status.c = a & 0x80;
 }
 
 /* Implementation of LSR */
 - (void) LSR_zeropage
 {
-    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    uint8 val = [ram read: param1];
+    [self debugLogWithFormat:@"LSR $%02X", param1];
+    uint8 r = val << 1;
+    [ram write:r loc:param1];
+    s.status.z = !(r);
+    s.status.c = r & 0x80;
 }
 
 /* Implementation of LSR */
 - (void) LSR_zeropageX
 {
-    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    uint8 val = [ram read: param1 + x];
+    [self debugLogWithFormat:@"LSR $%02X,X", param1];
+    uint8 r = val << 1;
+    [ram write:r loc:param1];
+    s.status.z = !(r);
+    s.status.c = r & 0x80;
 }
 
 /* Implementation of LSR */
 - (void) LSR_absolute
 {
-    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"LSR $%04X", addr];
+    uint8 val = [ram read: addr];
+    uint8 r = val << 1;
+    [ram write:r loc:param1];
+    s.status.z = !(r);
+    s.status.c = r & 0x80;
 }
 
 /* Implementation of LSR */
 - (void) LSR_absoluteX
 {
-    [self debugLogWithFormat:@"LSR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    [self debugLogWithFormat:@"LSR $%04X", addr + x];
+    uint8 val = [ram read: addr];
+    uint8 r = val << 1;
+    [ram write:r loc:param1];
+    s.status.z = !(r);
+    s.status.c = r & 0x80;
 }
 
 /*
@@ -2903,6 +2919,23 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"NOP"];  // literally does nothing...
 }
 
+/*
+ ORA  OR Memory with Accumulator
+ 
+ A OR M -> A                      N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     ORA #oper     09    2     2
+ zeropage      ORA oper      05    2     3
+ zeropage,X    ORA oper,X    15    2     4
+ absolute      ORA oper      0D    3     4
+ absolute,X    ORA oper,X    1D    3     4*
+ absolute,Y    ORA oper,Y    19    3     4*
+ (indirect,X)  ORA (oper,X)  01    2     6
+ (indirect),Y  ORA (oper),Y  11    2     5*
+ */
 /* Implementation of ORA */
 - (void) ORA_immediate
 {
@@ -2975,7 +3008,7 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param1];
 }
 
-/* Implementation of ORA */
+
 - (void) ORA_indirectY
 {
     [self debugLogWithFormat:@"ORA"];
@@ -2984,18 +3017,48 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param1];
 }
 
+/*
+ PHA  Push Accumulator on Stack
+ 
+ push A                           N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       PHA           48    1     3
+ */
 /* Implementation of PHA */
 - (void) PHA_implied
 {
     [self debugLogWithFormat:@"PHA"];
 }
 
+/*
+ PHP  Push Processor Status on Stack
+ 
+ push SR                          N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       PHP           08    1     3
+ */
 /* Implementation of PHP */
 - (void) PHP_implied
 {
     [self debugLogWithFormat:@"PHP"];
 }
 
+/*
+ PLA  Pull Accumulator from Stack
+ 
+ pull A                           N Z C I D V
+ + + - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       PLA           68    1     4
+ */
 /* Implementation of PLA */
 - (void) PLA_implied
 {
