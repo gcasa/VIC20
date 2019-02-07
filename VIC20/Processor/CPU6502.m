@@ -3373,24 +3373,39 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    a = a - param1;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
 - (void) SBC_zeropage
 {
-    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"SBC #%04X", param1];
+    uint8 val = [ram read: param1];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
 - (void) SBC_zeropageX
 {
-    [self debugLogWithFormat:@"SBC"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"SBC #%04X,X", param1];
+    uint8 val = [ram read: param1 + x];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
@@ -3403,6 +3418,13 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
@@ -3415,6 +3437,13 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr + x];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
@@ -3425,8 +3454,15 @@ static NSString *methodsString;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
     pc++;
-    uint8 param2 = [ram read: pc];
+    uint8 param2 = [ram read: pc + 1];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr + y];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
@@ -3436,6 +3472,15 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    uint8 param2 = [ram read: pc + 1];
+
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr + x];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of SBC */
@@ -3445,6 +3490,15 @@ static NSString *methodsString;
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
+    uint8 param2 = [ram read: pc + 1];
+    
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 val = [ram read: addr + y];
+    a = a - val;
+    uint8 v = a;
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /*
