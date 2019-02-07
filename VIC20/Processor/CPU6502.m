@@ -655,7 +655,7 @@ static NSString *methodsString;
      absolute      LSR oper      4E    3     6
      absolute,X    LSR oper,X    5E    3     7
      */
-    [self addOpcode:0x4a name:@"LSR" params:2 cycles:2 method:@"LSR_accumulator"];
+    [self addOpcode:0x4a name:@"LSR" params:1 cycles:2 method:@"LSR_accumulator"];
     [self addOpcode:0x46 name:@"LSR" params:2 cycles:3 method:@"LSR_zeropage"];
     [self addOpcode:0x56 name:@"LSR" params:2 cycles:4 method:@"LSR_zeropageX"];
     [self addOpcode:0x4e name:@"LSR" params:3 cycles:4 method:@"LSR_absolute"];
@@ -2533,7 +2533,10 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    [self push: pc + 1];
+    pc--;
+    
+    [self push: (pc >> 8) & 0xff];
+    [self push: (pc & 0xff)];
     [self debugLogWithFormat:@"JSR $%04X", addr];
     pc = addr; // Set new location.
 }
@@ -2839,9 +2842,7 @@ static NSString *methodsString;
 - (void) LSR_accumulator
 {
     [self debugLogWithFormat:@"LSR"];
-    pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    a = a >> 1;
 }
 
 /* Implementation of LSR */
@@ -3107,12 +3108,26 @@ static NSString *methodsString;
 - (void) RTI_implied
 {
     [self debugLogWithFormat:@"RTI"];
+    uint8_t lo, hi;
+    
+    s.sr = [self pop];
+    
+    lo = [self pop];
+    hi = [self pop];
+    
+    pc = (hi << 8) | lo;
 }
 
 /* Implementation of RTS */
 - (void) RTS_implied
 {
     [self debugLogWithFormat:@"RTS"];
+    uint8_t lo, hi;
+    
+    lo = [self pop];
+    hi = [self pop];
+    
+    pc = ((hi << 8) | lo) + 1;
 }
 
 /* Implementation of SBC */
