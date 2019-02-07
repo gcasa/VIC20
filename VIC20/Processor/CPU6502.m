@@ -1089,8 +1089,8 @@ static NSString *methodsString;
 - (void) state
 {
     NSLog(@"A = %02x, X = %02x, Y = %02x, PC = %04x, SP = %02x", a, x, y, pc, sp);
-    NSLog(@"N     V      B     D     I     Z      C");
-    NSLog(@"%d    %d     %d    %d    %d    %d     %d", s.status.n, s.status.v, s.status.b, s.status.d, s.status.i, s.status.z, s.status.c);
+    NSLog(@"N\tV\tB\tD\tI\tZ\tC");
+    NSLog(@"%1d\t%1d\t%1d\t%1d\t%1d\t%1d\t%1d", s.status.n, s.status.v, s.status.b, s.status.d, s.status.i, s.status.z, s.status.c);
 }
 
 // Instruction interpretation....
