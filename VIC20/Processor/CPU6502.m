@@ -2939,64 +2939,87 @@ static NSString *methodsString;
 /* Implementation of ORA */
 - (void) ORA_immediate
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %02X", param1];
+    [self debugLogWithFormat:@"ORA #%02X", param1];
+    uint8 r = a | param1;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ORA */
 - (void) ORA_zeropage
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %02X", param1];
+    [self debugLogWithFormat:@"ORA $%02X", param1];
+    uint8 v = [ram read: param1];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ORA */
 - (void) ORA_zeropageX
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %02X", param1];
+    [self debugLogWithFormat:@"ORA $%02X,X", param1];
+    uint8 v = [ram read: param1 + x];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ORA */
 - (void) ORA_absolute
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    [self debugLogWithFormat:@"ORA $%04X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ORA */
 - (void) ORA_absoluteX
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    [self debugLogWithFormat:@"ORA $%04X,X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr + x];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ORA */
 - (void) ORA_absoluteY
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
+    [self debugLogWithFormat:@"ORA $%04X,Y", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr + y];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /* Implementation of ORA */
@@ -3031,6 +3054,7 @@ static NSString *methodsString;
 - (void) PHA_implied
 {
     [self debugLogWithFormat:@"PHA"];
+    [self push: a];
 }
 
 /*
@@ -3047,6 +3071,7 @@ static NSString *methodsString;
 - (void) PHP_implied
 {
     [self debugLogWithFormat:@"PHP"];
+    [self push: s.sr];
 }
 
 /*
@@ -3063,12 +3088,24 @@ static NSString *methodsString;
 - (void) PLA_implied
 {
     [self debugLogWithFormat:@"PLA"];
+    a = [self pop];
 }
 
+/*
+ PLP  Pull Processor Status from Stack
+ 
+ pull SR                          N Z C I D V
+ from stack
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       PLP           28    1     4
+ */
 /* Implementation of PLP */
 - (void) PLP_implied
 {
     [self debugLogWithFormat:@"PLP"];
+    s.sr = [self pop];
 }
 
 /* Implementation of ROL */
@@ -3167,6 +3204,16 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param2];
 }
 
+/*
+ RTI  Return from Interrupt
+ 
+ pull SR, pull PC                 N Z C I D V
+ from stack
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       RTI           40    1     6
+ */
 /* Implementation of RTI */
 - (void) RTI_implied
 {
@@ -3181,6 +3228,16 @@ static NSString *methodsString;
     pc = (hi << 8) | lo;
 }
 
+/*
+ RTS  Return from Subroutine
+ 
+ pull PC, PC+1 -> PC              N Z C I D V
+ - - - - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       RTS           60    1     6
+ */
 /* Implementation of RTS */
 - (void) RTS_implied
 {
@@ -3193,6 +3250,23 @@ static NSString *methodsString;
     pc = ((hi << 8) | lo) + 1;
 }
 
+/*
+ SBC  Subtract Memory from Accumulator with Borrow
+ 
+ A - M - C -> A                   N Z C I D V
+ + + + - - +
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ immidiate     SBC #oper     E9    2     2
+ zeropage      SBC oper      E5    2     3
+ zeropage,X    SBC oper,X    F5    2     4
+ absolute      SBC oper      ED    3     4
+ absolute,X    SBC oper,X    FD    3     4*
+ absolute,Y    SBC oper,Y    F9    3     4*
+ (indirect,X)  SBC (oper,X)  E1    2     6
+ (indirect),Y  SBC (oper),Y  F1    2     5*
+ */
 /* Implementation of SBC */
 - (void) SBC_immediate
 {
