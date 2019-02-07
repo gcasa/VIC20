@@ -3352,18 +3352,21 @@ static NSString *methodsString;
 - (void) SEC_implied
 {
     [self debugLogWithFormat:@"SEC"];
+    s.status.c = 1;
 }
 
 /* Implementation of SED */
 - (void) SED_implied
 {
     [self debugLogWithFormat:@"SED"];
+    s.status.d = 1;
 }
 
 /* Implementation of SEI */
 - (void) SEI_implied
 {
     [self debugLogWithFormat:@"SEI"];
+    s.status.i = 1;
 }
 
 /*
