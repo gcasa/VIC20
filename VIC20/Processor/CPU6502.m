@@ -3025,19 +3025,33 @@ static NSString *methodsString;
 /* Implementation of ORA */
 - (void) ORA_indirectX
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    pc++;
+    uint8 p2 = [ram read: pc + 1];
+    [self debugLogWithFormat:@"ORA $%04X,Y", param1];
+    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr + x];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 
 - (void) ORA_indirectY
 {
-    [self debugLogWithFormat:@"ORA"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    pc++;
+    uint8 p2 = [ram read: pc + 1];
+    [self debugLogWithFormat:@"ORA $%04X,Y", param1];
+    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr + y];
+    uint8 r = a | v;
+    a = r;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
 }
 
 /*
@@ -3108,28 +3122,56 @@ static NSString *methodsString;
     s.sr = [self pop];
 }
 
+/*
+ ROL  Rotate One Bit Left (Memory or Accumulator)
+ 
+ C <- [76543210] <- C             N Z C I D V
+ + + + - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ accumulator   ROL A         2A    1     2
+ zeropage      ROL oper      26    2     5
+ zeropage,X    ROL oper,X    36    2     6
+ absolute      ROL oper      2E    3     6
+ absolute,X    ROL oper,X    3E    3     7
+ */
 /* Implementation of ROL */
 - (void) ROL_accumulator
 {
     [self debugLogWithFormat:@"ROL"];
+    a = a << 1;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
+    s.status.c = a & 0x80;
 }
 
 /* Implementation of ROL */
 - (void) ROL_zeropage
 {
-    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"ROL $%02X", param1];
+    uint8 v = [ram read: param1];
+    v = v << 1;
+    [ram write:v loc:param1];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of ROL */
 - (void) ROL_zeropageX
 {
-    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"ROL $%02X,X", param1];
+    uint8 v = [ram read: param1];
+    v = v << 1;
+    [ram write:v loc:param1 + x];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of ROL */
@@ -3142,6 +3184,13 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr];
+    v = v << 1;
+    [ram write:v loc:addr];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of ROL */
@@ -3154,54 +3203,104 @@ static NSString *methodsString;
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr + x];
+    v = v << 1;
+    [ram write:v loc:addr + x];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
+/*
+ ROR  Rotate One Bit Right (Memory or Accumulator)
+ 
+ C -> [76543210] -> C             N Z C I D V
+ + + + - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ accumulator   ROR A         6A    1     2
+ zeropage      ROR oper      66    2     5
+ zeropage,X    ROR oper,X    76    2     6
+ absolute      ROR oper      6E    3     6
+ absolute,X    ROR oper,X    7E    3     7
+ */
 /* Implementation of ROR */
 - (void) ROR_accumulator
 {
     [self debugLogWithFormat:@"ROR"];
+    [self debugLogWithFormat:@"ROL"];
+    a = a >> 1;
+    s.status.n = a & 0x80;
+    s.status.z = !(a);
+    s.status.c = a & 0x80;
 }
 
 /* Implementation of ROR */
 - (void) ROR_zeropage
 {
-    [self debugLogWithFormat:@"ROR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"ROL $%02X", param1];
+    uint8 v = [ram read: param1];
+    v = v >> 1;
+    [ram write:v loc:param1];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of ROR */
 - (void) ROR_zeropageX
 {
-    [self debugLogWithFormat:@"ROR"];
     pc++;
     uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    [self debugLogWithFormat:@"ROL $%02X,X", param1];
+    uint8 v = [ram read: param1];
+    v = v >> 1;
+    [ram write:v loc:param1 + x];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of ROR */
 - (void) ROR_absolute
 {
-    [self debugLogWithFormat:@"ROR"];
+    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr];
+    v = v >> 1;
+    [ram write:v loc:addr];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /* Implementation of ROR */
 - (void) ROR_absoluteX
 {
-    [self debugLogWithFormat:@"ROR"];
+    [self debugLogWithFormat:@"ROL"];
     pc++;
     uint8 param1 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param1];
     pc++;
     uint8 param2 = [ram read: pc];
     [self debugLogWithFormat:@"param = %X", param2];
+    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
+    uint8 v = [ram read: addr + x];
+    v = v << 1;
+    [ram write:v loc:addr + x];
+    s.status.n = v & 0x80;
+    s.status.z = !(v);
+    s.status.c = v & 0x80;
 }
 
 /*
@@ -3348,6 +3447,16 @@ static NSString *methodsString;
     [self debugLogWithFormat:@"param = %X", param1];
 }
 
+/*
+ SEC  Set Carry Flag
+ 
+ 1 -> C                           N Z C I D V
+ - - 1 - - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       SEC           38    1     2
+ */
 /* Implementation of SEC */
 - (void) SEC_implied
 {
@@ -3355,6 +3464,16 @@ static NSString *methodsString;
     s.status.c = 1;
 }
 
+/*
+ SED  Set Decimal Flag
+ 
+ 1 -> D                           N Z C I D V
+ - - - - 1 -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       SED           F8    1     2
+ */
 /* Implementation of SED */
 - (void) SED_implied
 {
@@ -3362,6 +3481,16 @@ static NSString *methodsString;
     s.status.d = 1;
 }
 
+/*
+ SEI  Set Interrupt Disable Status
+ 
+ 1 -> I                           N Z C I D V
+ - - - 1 - -
+ 
+ addressing    assembler    opc  bytes  cyles
+ --------------------------------------------
+ implied       SEI           78    1     2
+ */
 /* Implementation of SEI */
 - (void) SEI_implied
 {
