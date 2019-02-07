@@ -1069,11 +1069,13 @@ static NSString *methodsString;
     // return;
     pc = loc;
     [self fetch];
+    [self debugLogWithFormat:@"=== Program execution start"];
     while([currentInstruction integerValue] != 0x00)
     {
         [self execute];
     }
     [self state];
+    [self debugLogWithFormat:@"=== Execution halted"];
 }
 
 - (void) run
