@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		144BDF5A221161A1008B6CA5 /* CPU6502+Instructions.m in Sources */ = {isa = PBXBuildFile; fileRef = 144BDF59221161A1008B6CA5 /* CPU6502+Instructions.m */; };
 		14B271772136071200E9588E /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B271762136071200E9588E /* AppDelegate.m */; };
 		14B271792136071400E9588E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 14B271782136071400E9588E /* Assets.xcassets */; };
 		14B2717C2136071400E9588E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 14B2717A2136071400E9588E /* MainMenu.xib */; };
@@ -20,6 +21,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		144BDF58221161A1008B6CA5 /* CPU6502+Instructions.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "CPU6502+Instructions.h"; sourceTree = "<group>"; };
+		144BDF59221161A1008B6CA5 /* CPU6502+Instructions.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = "CPU6502+Instructions.m"; sourceTree = "<group>"; };
 		14B271722136071100E9588E /* VIC20.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = VIC20.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		14B271752136071100E9588E /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		14B271762136071200E9588E /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
@@ -105,6 +108,8 @@
 				14B2719021360CFE00E9588E /* VIC6561.m */,
 				14B2718C21360CBB00E9588E /* CPU6502.h */,
 				14B2718D21360CBB00E9588E /* CPU6502.m */,
+				144BDF58221161A1008B6CA5 /* CPU6502+Instructions.h */,
+				144BDF59221161A1008B6CA5 /* CPU6502+Instructions.m */,
 			);
 			path = Processor;
 			sourceTree = "<group>";
@@ -179,6 +184,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				144BDF5A221161A1008B6CA5 /* CPU6502+Instructions.m in Sources */,
 				14B27197213A1ACE00E9588E /* ROM.m in Sources */,
 				14B2719121360CFE00E9588E /* VIC6561.m in Sources */,
 				14B2717F2136071400E9588E /* main.m in Sources */,

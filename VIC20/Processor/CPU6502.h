@@ -73,4 +73,7 @@ struct status {
 - (void) push: (uint8)value;
 - (uint8) pop;
 
+// Debug
+- (void)debugLogWithFormat: (NSString *)formatString,...;
+
 @end
