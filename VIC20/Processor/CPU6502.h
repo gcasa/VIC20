@@ -42,7 +42,7 @@ struct status {
     
     // Memory...
     RAM *ram;
-    
+    NSUInteger cycles;
     BOOL debug;
     
     // Current instruction
@@ -68,6 +68,7 @@ struct status {
 - (void) run;
 - (void) step;
 - (void) state;
+- (void) tick;
 
 // Stack...
 - (void) push: (uint8)value;

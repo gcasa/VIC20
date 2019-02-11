@@ -1088,6 +1088,11 @@ static NSString *methodsString;
     pc++;
 }
 
+- (void) tick
+{
+    cycles++;
+}
+
 - (void) state
 {
     NSLog(@"A = %02x, X = %02x, Y = %02x, PC = %04x, SP = %02x", a, x, y, pc, sp);
