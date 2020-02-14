@@ -1164,5 +1164,4 @@ static NSString *methodsString;
     return [ram read:(STACKBASE + sp)];
 }
 
-
 @end
