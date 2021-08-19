@@ -13,7 +13,7 @@
 		14B2717C2136071400E9588E /* MainMenu.xib in Resources */ = {isa = PBXBuildFile; fileRef = 14B2717A2136071400E9588E /* MainMenu.xib */; };
 		14B2717F2136071400E9588E /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2717E2136071400E9588E /* main.m */; };
 		14B2718E21360CBB00E9588E /* CPU6502.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2718D21360CBB00E9588E /* CPU6502.m */; };
-		14B2719121360CFE00E9588E /* VIC6561.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719021360CFE00E9588E /* VIC6561.m */; };
+		14B2719121360CFE00E9588E /* VIC6560.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719021360CFE00E9588E /* VIC6560.m */; };
 		14B27194213A1A8F00E9588E /* RAM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27193213A1A8F00E9588E /* RAM.m */; };
 		14B27197213A1ACE00E9588E /* ROM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27196213A1ACE00E9588E /* ROM.m */; };
 		14B2719C213A1B9E00E9588E /* Memory.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719B213A1B9E00E9588E /* Memory.m */; };
@@ -33,8 +33,8 @@
 		14B271802136071400E9588E /* VIC20.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = VIC20.entitlements; sourceTree = "<group>"; };
 		14B2718C21360CBB00E9588E /* CPU6502.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = CPU6502.h; sourceTree = "<group>"; };
 		14B2718D21360CBB00E9588E /* CPU6502.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = CPU6502.m; sourceTree = "<group>"; };
-		14B2718F21360CFE00E9588E /* VIC6561.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VIC6561.h; sourceTree = "<group>"; };
-		14B2719021360CFE00E9588E /* VIC6561.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VIC6561.m; sourceTree = "<group>"; };
+		14B2718F21360CFE00E9588E /* VIC6560.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VIC6560.h; sourceTree = "<group>"; };
+		14B2719021360CFE00E9588E /* VIC6560.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VIC6560.m; sourceTree = "<group>"; };
 		14B27192213A1A8F00E9588E /* RAM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RAM.h; sourceTree = "<group>"; };
 		14B27193213A1A8F00E9588E /* RAM.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RAM.m; sourceTree = "<group>"; };
 		14B27195213A1ACE00E9588E /* ROM.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ROM.h; sourceTree = "<group>"; };
@@ -104,8 +104,8 @@
 		14B7195B21F4368F00C72FFB /* Processor */ = {
 			isa = PBXGroup;
 			children = (
-				14B2718F21360CFE00E9588E /* VIC6561.h */,
-				14B2719021360CFE00E9588E /* VIC6561.m */,
+				14B2718F21360CFE00E9588E /* VIC6560.h */,
+				14B2719021360CFE00E9588E /* VIC6560.m */,
 				14B2718C21360CBB00E9588E /* CPU6502.h */,
 				14B2718D21360CBB00E9588E /* CPU6502.m */,
 				144BDF58221161A1008B6CA5 /* CPU6502+Instructions.h */,
@@ -186,7 +186,7 @@
 			files = (
 				144BDF5A221161A1008B6CA5 /* CPU6502+Instructions.m in Sources */,
 				14B27197213A1ACE00E9588E /* ROM.m in Sources */,
-				14B2719121360CFE00E9588E /* VIC6561.m in Sources */,
+				14B2719121360CFE00E9588E /* VIC6560.m in Sources */,
 				14B2717F2136071400E9588E /* main.m in Sources */,
 				14B271772136071200E9588E /* AppDelegate.m in Sources */,
 				14B27194213A1A8F00E9588E /* RAM.m in Sources */,

@@ -12,7 +12,7 @@
 
 - (void) write: (NSData *)data atLocation: (uint16)loc
 {
-    NSLog(@"Writing to read only memory");
+    NSLog(@"Attempt to write to read only memory");
 }
 
 @end

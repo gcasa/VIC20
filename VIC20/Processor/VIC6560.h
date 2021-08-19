@@ -1,13 +1,13 @@
 //
-//  VIC6561.m
+//  VIC6560.h
 //  VIC20
-//
+//  VIC chip
 //  Created by Gregory Casamento on 8/28/18.
 //  Copyright © 2018 Open Logic. All rights reserved.
 //
 
-#import "VIC6561.h"
+#import <Foundation/Foundation.h>
 
-@implementation VIC6561
+@interface VIC6561 : NSObject
 
 @end
