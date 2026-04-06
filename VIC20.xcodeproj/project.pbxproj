@@ -18,6 +18,9 @@
 		14B27197213A1ACE00E9588E /* ROM.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B27196213A1ACE00E9588E /* ROM.m */; };
 		14B2719C213A1B9E00E9588E /* Memory.m in Sources */ = {isa = PBXBuildFile; fileRef = 14B2719B213A1B9E00E9588E /* Memory.m */; };
 		14B7195D21F70F4700C72FFB /* temp.img in Resources */ = {isa = PBXBuildFile; fileRef = 14B7195C21F70CF400C72FFB /* temp.img */; };
+		14D998962F84605500E2451F /* KeyboardMatrix.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D998912F84605500E2451F /* KeyboardMatrix.m */; };
+		14D998972F84605500E2451F /* VIC20MemoryManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D998952F84605500E2451F /* VIC20MemoryManager.m */; };
+		14D998982F84605500E2451F /* VIA6522.m in Sources */ = {isa = PBXBuildFile; fileRef = 14D998932F84605500E2451F /* VIA6522.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -42,6 +45,12 @@
 		14B27198213A1AEF00E9588E /* Memory.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Memory.h; sourceTree = "<group>"; };
 		14B2719B213A1B9E00E9588E /* Memory.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = Memory.m; sourceTree = "<group>"; };
 		14B7195C21F70CF400C72FFB /* temp.img */ = {isa = PBXFileReference; lastKnownFileType = file; path = temp.img; sourceTree = "<group>"; };
+		14D998902F84605500E2451F /* KeyboardMatrix.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = KeyboardMatrix.h; sourceTree = "<group>"; };
+		14D998912F84605500E2451F /* KeyboardMatrix.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KeyboardMatrix.m; sourceTree = "<group>"; };
+		14D998922F84605500E2451F /* VIA6522.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VIA6522.h; sourceTree = "<group>"; };
+		14D998932F84605500E2451F /* VIA6522.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VIA6522.m; sourceTree = "<group>"; };
+		14D998942F84605500E2451F /* VIC20MemoryManager.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = VIC20MemoryManager.h; sourceTree = "<group>"; };
+		14D998952F84605500E2451F /* VIC20MemoryManager.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = VIC20MemoryManager.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -104,6 +113,12 @@
 		14B7195B21F4368F00C72FFB /* Processor */ = {
 			isa = PBXGroup;
 			children = (
+				14D998902F84605500E2451F /* KeyboardMatrix.h */,
+				14D998912F84605500E2451F /* KeyboardMatrix.m */,
+				14D998922F84605500E2451F /* VIA6522.h */,
+				14D998932F84605500E2451F /* VIA6522.m */,
+				14D998942F84605500E2451F /* VIC20MemoryManager.h */,
+				14D998952F84605500E2451F /* VIC20MemoryManager.m */,
 				14B2718F21360CFE00E9588E /* VIC6560.h */,
 				14B2719021360CFE00E9588E /* VIC6560.m */,
 				14B2718C21360CBB00E9588E /* CPU6502.h */,
@@ -190,6 +205,9 @@
 				14B2717F2136071400E9588E /* main.m in Sources */,
 				14B271772136071200E9588E /* AppDelegate.m in Sources */,
 				14B27194213A1A8F00E9588E /* RAM.m in Sources */,
+				14D998962F84605500E2451F /* KeyboardMatrix.m in Sources */,
+				14D998972F84605500E2451F /* VIC20MemoryManager.m in Sources */,
+				14D998982F84605500E2451F /* VIA6522.m in Sources */,
 				14B2719C213A1B9E00E9588E /* Memory.m in Sources */,
 				14B2718E21360CBB00E9588E /* CPU6502.m in Sources */,
 			);

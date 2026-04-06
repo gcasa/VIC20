@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class RAM, ROM, VIC6561;
+@class RAM, ROM, VIC6561, VIA6522, KeyboardMatrix, VIC20MemoryManager;
 
 #define ZEROPAGE    0x0000  // 0x0000 - 0x00FF
 #define STACKBASE   0x0100  // 0x0100 - 0x01FF
@@ -40,9 +40,14 @@ struct status {
         uint8 sr;
     } s;
     
-    // Memory...
-    RAM *ram;
+    // Memory and I/O...
+    RAM *ram;  // Keep for backward compatibility
     VIC6561 *vic;
+    VIA6522 *via1;
+    VIA6522 *via2;
+    KeyboardMatrix *keyboard;
+    VIC20MemoryManager *memoryManager;
+    
     NSUInteger cycles;
     BOOL debug;
     
@@ -53,6 +58,7 @@ struct status {
 // Initialize with memory...
 - (id) initWithSize: (NSUInteger)size;
 - (id) initWithRAM: (RAM *)memory VIC: (VIC6561 *)vicChip;
+- (id) initVIC20System;  // Complete VIC-20 system initialization
 
 // Reset/Interrupt...
 - (void) reset;
@@ -69,6 +75,18 @@ struct status {
 // Memory access (with VIC integration)
 - (uint8) readMemory: (uint16)address;
 - (void) writeMemory: (uint8)value address: (uint16)address;
+
+// Component access
+- (VIC6561 *) getVIC;
+- (VIA6522 *) getVIA1;
+- (VIA6522 *) getVIA2;
+- (KeyboardMatrix *) getKeyboard;
+- (VIC20MemoryManager *) getMemoryManager;
+
+// System control
+- (void) loadROMs: (NSString *)romPath;
+- (BOOL) insertCartridge: (NSData *)cartridgeData;
+- (void) configureMemoryExpansion: (BOOL)enable3K enable8K1:(BOOL)enable8K1 enable8K2:(BOOL)enable8K2;
 
 // Run...
 - (void) run;

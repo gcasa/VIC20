@@ -10,10 +10,15 @@
 #import "RAM.h"
 #import "ROM.h"
 #import "VIC6560.h"
+#import "VIA6522.h"
+#import "KeyboardMatrix.h"
+#import "VIC20MemoryManager.h"
 
 @implementation CPU6502
 
-/*  CPU INSTRUCTION TABLE
+/*  
+CPU INSTRUCTION TABLE
+----
  HI    LO-NIBBLE
        00          01          02     03     04        05         06         07   08       09         0A       0B   0C        0D          0E         0F
  00    BRK impl    ORA X,ind   ---    ---    ---       ORA zpg    ASL zpg    ---  PHP impl ORA #      ASL A    ---  ---       ORA abs     ASL abs    ---
@@ -32,6 +37,7 @@
  D0    BNE rel     CMP ind,Y   ---    ---    ---       CMP zpg,X  DEC zpg,X  ---  CLD impl CMP abs,Y  ---      ---  ---       CMP abs,X   DEC abs,X  ---
  E0    CPX #       SBC X,ind   ---    ---    CPX zpg   SBC zpg    INC zpg    ---  INX impl SBC #      NOP impl ---  CPX abs   SBC abs     INC abs    ---
  F0    BEQ rel     SBC ind,Y   ---    ---    ---       SBC zpg,X  INC zpg,X  ---  SED impl SBC abs,Y  ---      ---  ---       SBC abs,X   INC abs,X  ---
+----
  */
 
 static NSMutableDictionary *instructionMap;
@@ -1107,9 +1113,17 @@ static NSString *methodsString;
 {
     cycles++;
     
-    // Tick the VIC chip for video timing
+    // Tick all chips for synchronized timing
     if (vic) {
         [vic tick];
+    }
+    
+    if (via1) {
+        [via1 tick];
+    }
+    
+    if (via2) {
+        [via2 tick];
     }
 }
 
@@ -1119,8 +1133,22 @@ static NSString *methodsString;
     NSLog(@"N\tV\tB\tD\tI\tZ\tC");
     NSLog(@"%1d\t%1d\t%1d\t%1d\t%1d\t%1d\t%1d", s.status.n, s.status.v, s.status.b, s.status.d, s.status.i, s.status.z, s.status.c);
     
-    if (debug && vic) {
-        NSLog(@"%@", [vic getRegisterStatus]);
+    if (debug) {
+        if (vic) {
+            NSLog(@"%@", [vic getRegisterStatus]);
+        }
+        if (via1) {
+            NSLog(@"%@", [via1 getRegisterStatus]);
+        }
+        if (via2) {
+            NSLog(@"%@", [via2 getRegisterStatus]);
+        }
+        if (keyboard) {
+            NSLog(@"%@", [keyboard getMatrixStatus]);
+        }
+        if (memoryManager) {
+            NSLog(@"%@", [memoryManager getMemoryMapStatus]);
+        }
     }
 }
 
@@ -1217,6 +1245,11 @@ static NSString *methodsString;
 
 - (uint8) readMemory: (uint16)address
 {
+    if (memoryManager) {
+        return [memoryManager readMemory:address];
+    }
+    
+    // Fallback to old VIC integration for backward compatibility
     // VIC-20 Memory Map:
     // 0x9000-0x900F: VIC registers
     // 0x9110-0x911F: VIA#1 registers  
@@ -1228,20 +1261,170 @@ static NSString *methodsString;
         return [vic readVICRegister:address];
     }
     
+    if (address >= 0x9110 && address <= 0x911F && via1) {
+        // VIA1 register access
+        return [via1 readRegister:(address - 0x9110)];
+    }
+    
+    if (address >= 0x9120 && address <= 0x912F && via2) {
+        // VIA2 register access
+        return [via2 readRegister:(address - 0x9120)];
+    }
+    
     // Default to RAM access
     return [ram read:address];
 }
 
 - (void) writeMemory: (uint8)value address: (uint16)address
 {
+    if (memoryManager) {
+        [memoryManager writeMemory:value address:address];
+        return;
+    }
+    
+    // Fallback to old VIC integration for backward compatibility
     if (address >= 0x9000 && address <= 0x900F) {
         // VIC register access
         [vic writeVICRegister:address value:value];
         return;
     }
     
+    if (address >= 0x9110 && address <= 0x911F && via1) {
+        // VIA1 register access
+        [via1 writeRegister:(address - 0x9110) value:value];
+        return;
+    }
+    
+    if (address >= 0x9120 && address <= 0x912F && via2) {
+        // VIA2 register access
+        [via2 writeRegister:(address - 0x9120) value:value];
+        return;
+    }
+    
     // Default to RAM access
     [ram write:value loc:address];
+}
+
+#pragma mark - Component Access
+
+- (VIC6561 *) getVIC
+{
+    return vic;
+}
+
+- (VIA6522 *) getVIA1
+{
+    return via1;
+}
+
+- (VIA6522 *) getVIA2
+{
+    return via2;
+}
+
+- (KeyboardMatrix *) getKeyboard
+{
+    return keyboard;
+}
+
+- (VIC20MemoryManager *) getMemoryManager
+{
+    return memoryManager;
+}
+
+#pragma mark - System Control
+
+- (void) loadROMs: (NSString *)romPath
+{
+    if (!memoryManager) {
+        NSLog(@"Error: Memory manager not initialized");
+        return;
+    }
+    
+    NSString *basicROMPath = [romPath stringByAppendingPathComponent:@"basic.rom"];
+    NSString *kernalROMPath = [romPath stringByAppendingPathComponent:@"kernal.rom"];
+    NSString *charROMPath = [romPath stringByAppendingPathComponent:@"characters.rom"];
+    
+    // Load BASIC ROM
+    NSData *basicROM = [NSData dataWithContentsOfFile:basicROMPath];
+    if (basicROM) {
+        [memoryManager loadBasicROM:basicROM];
+        NSLog(@"Loaded BASIC ROM: %@ (%luKB)", basicROMPath, (unsigned long)[basicROM length] / 1024);
+    } else {
+        NSLog(@"Warning: Could not load BASIC ROM from %@", basicROMPath);
+    }
+    
+    // Load KERNAL ROM
+    NSData *kernalROM = [NSData dataWithContentsOfFile:kernalROMPath];
+    if (kernalROM) {
+        [memoryManager loadKernalROM:kernalROM];
+        NSLog(@"Loaded KERNAL ROM: %@ (%luKB)", kernalROMPath, (unsigned long)[kernalROM length] / 1024);
+    } else {
+        NSLog(@"Warning: Could not load KERNAL ROM from %@", kernalROMPath);
+    }
+    
+    // Load Character ROM
+    NSData *charROM = [NSData dataWithContentsOfFile:charROMPath];
+    if (charROM) {
+        [memoryManager loadCharacterROM:charROM];
+        NSLog(@"Loaded Character ROM: %@ (%luKB)", charROMPath, (unsigned long)[charROM length] / 1024);
+    } else {
+        NSLog(@"Warning: Could not load Character ROM from %@", charROMPath);
+        // Load default character set
+        if (vic) {
+            [vic loadDefaultCharacterSet];
+            NSLog(@"Loaded default character set");
+        }
+    }
+}
+
+- (BOOL) insertCartridge: (NSData *)cartridgeData
+{
+    if (!memoryManager) {
+        return NO;
+    }
+    
+    // Auto-detect cartridge type based on size
+    VIC20CartridgeType cartType = VIC20_CARTRIDGE_NONE;
+    NSUInteger dataSize = [cartridgeData length];
+    
+    if (dataSize == 0x1000) {       // 4KB
+        cartType = VIC20_CARTRIDGE_4K;
+    } else if (dataSize == 0x2000) { // 8KB
+        cartType = VIC20_CARTRIDGE_8K;
+    } else if (dataSize == 0x4000) { // 16KB
+        cartType = VIC20_CARTRIDGE_16K;
+    } else {
+        NSLog(@"Error: Unsupported cartridge size: %luKB", (unsigned long)(dataSize / 1024));
+        return NO;
+    }
+    
+    BOOL success = [memoryManager insertCartridge:cartridgeData type:cartType];
+    if (success) {
+        NSLog(@"Inserted cartridge: Type %d, Size %luKB", cartType, (unsigned long)(dataSize / 1024));
+    }
+    
+    return success;
+}
+
+- (void) configureMemoryExpansion: (BOOL)enable3K enable8K1:(BOOL)enable8K1 enable8K2:(BOOL)enable8K2
+{
+    if (!memoryManager) {
+        return;
+    }
+    
+    VIC20MemoryConfig config = [memoryManager getMemoryConfiguration];
+    config.expansion_3K = enable3K;
+    config.expansion_8K_1 = enable8K1;
+    config.expansion_8K_2 = enable8K2;
+    
+    [memoryManager setMemoryConfiguration:config];
+    
+    NSLog(@"Memory expansion configured: 3K=%s, 8K1=%s, 8K2=%s", 
+          enable3K ? "On" : "Off", 
+          enable8K1 ? "On" : "Off", 
+          enable8K2 ? "On" : "Off");
+    NSLog(@"Total RAM: %luKB", (unsigned long)([memoryManager getTotalRAMSize] / 1024));
 }
 
 @end
