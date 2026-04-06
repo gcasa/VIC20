@@ -13,6 +13,28 @@ This test program demonstrates the complete VIC-20 emulator system with all inte
 
 ## Compilation
 
+### Easy Way: Using the Build Script
+
+```bash
+# Make the script executable (first time only)
+chmod +x build_and_test.sh
+
+# Compile and run the test
+./build_and_test.sh
+
+# Or just compile
+./build_and_test.sh compile
+
+# Or just run (compiles if needed)
+./build_and_test.sh test
+
+# Clean build artifacts
+./build_and_test.sh clean
+
+# Check for ROM files and cartridges
+./build_and_test.sh check
+```
+
 ### Using Xcode
 
 1. Add `VIC20Test.m` to your Xcode project

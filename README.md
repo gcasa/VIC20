@@ -68,7 +68,10 @@ Once built, the VIC-20 emulator will launch as a standard macOS application. The
 A comprehensive test program (`VIC20Test.m`) is included that validates all system components:
 
 ```bash
-# Compile the test program (command line)
+# Easy way: Use the build script
+./build_and_test.sh
+
+# Or compile manually (command line)
 clang -framework Foundation -I./VIC20 VIC20Test.m VIC20/Processor/*.m VIC20/RAM/*.m -o VIC20Test
 
 # Run the test
@@ -120,6 +123,7 @@ VIC20/
 │   └── Assets.xcassets/     # Application resources and icons  
 ├── VIC20.xcodeproj/         # Xcode project configuration
 ├── VIC20Test.m             # System integration test program
+├── build_and_test.sh       # Automated build and test script
 ├── TEST_README.md          # Test program documentation
 ├── LICENSE                 # GPL v3 License
 └── README.md              # This file
