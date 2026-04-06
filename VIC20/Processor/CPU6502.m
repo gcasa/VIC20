@@ -9,6 +9,7 @@
 #import "CPU6502.h"
 #import "RAM.h"
 #import "ROM.h"
+#import "VIC6560.h"
 
 @implementation CPU6502
 
@@ -1042,8 +1043,8 @@ static NSString *methodsString;
     y  = 0x00;
     
     // Load PC from reset vector at 0xFFFC-0xFFFD
-    uint8 pcl = [ram read: RESETVECTOR];
-    uint8 pch = [ram read: RESETVECTOR + 1];
+    uint8 pcl = [self readMemory: RESETVECTOR];
+    uint8 pch = [self readMemory: RESETVECTOR + 1];
     pc = ((uint16)pch << 8) | pcl;
     
     // Initialize stack pointer to 0xFF (top of stack)
@@ -1058,6 +1059,11 @@ static NSString *methodsString;
     s.status.z  = 0;
     s.status.c  = 0;
     s.status.unused = 1;  // Bit 5 is always 1
+    
+    // Initialize VIC chip
+    if (vic) {
+        [vic loadDefaultCharacterSet];
+    }
 }
 
 - (void) interrupt
@@ -1067,7 +1073,7 @@ static NSString *methodsString;
 
 - (void) fetch
 {
-    uint8 opcode = [ram read: pc];
+    uint8 opcode = [self readMemory: pc];
     currentInstruction = [NSNumber numberWithInt: opcode];
     // PC will be incremented by execute methods as needed
 }
@@ -1100,6 +1106,11 @@ static NSString *methodsString;
 - (void) tick
 {
     cycles++;
+    
+    // Tick the VIC chip for video timing
+    if (vic) {
+        [vic tick];
+    }
 }
 
 - (void) state
@@ -1107,6 +1118,10 @@ static NSString *methodsString;
     NSLog(@"A = %02x, X = %02x, Y = %02x, PC = %04x, SP = %02x", a, x, y, pc, sp);
     NSLog(@"N\tV\tB\tD\tI\tZ\tC");
     NSLog(@"%1d\t%1d\t%1d\t%1d\t%1d\t%1d\t%1d", s.status.n, s.status.v, s.status.b, s.status.d, s.status.i, s.status.z, s.status.c);
+    
+    if (debug && vic) {
+        NSLog(@"%@", [vic getRegisterStatus]);
+    }
 }
 
 // Instruction interpretation....
@@ -1157,7 +1172,7 @@ static NSString *methodsString;
 // Stack
 - (void) push: (uint8)value
 {
-    [ram write: value loc:(STACKBASE + sp)];
+    [self writeMemory: value address:(STACKBASE + sp)];
     if(sp == 0x00)
     {
         sp = 0xFF;
@@ -1178,7 +1193,7 @@ static NSString *methodsString;
     {
         sp++;
     }
-    return [ram read:(STACKBASE + sp)];
+    return [self readMemory:(STACKBASE + sp)];
 }
 
 // Helper methods for flag calculations
@@ -1196,6 +1211,37 @@ static NSString *methodsString;
 - (void) setOverflowFlag: (BOOL)overflow
 {
     s.status.v = overflow ? 1 : 0;
+}
+
+#pragma mark - Memory Access with VIC Integration
+
+- (uint8) readMemory: (uint16)address
+{
+    // VIC-20 Memory Map:
+    // 0x9000-0x900F: VIC registers
+    // 0x9110-0x911F: VIA#1 registers  
+    // 0x9120-0x912F: VIA#2 registers
+    // Other addresses: RAM/ROM
+    
+    if (address >= 0x9000 && address <= 0x900F) {
+        // VIC register access
+        return [vic readVICRegister:address];
+    }
+    
+    // Default to RAM access
+    return [ram read:address];
+}
+
+- (void) writeMemory: (uint8)value address: (uint16)address
+{
+    if (address >= 0x9000 && address <= 0x900F) {
+        // VIC register access
+        [vic writeVICRegister:address value:value];
+        return;
+    }
+    
+    // Default to RAM access
+    [ram write:value loc:address];
 }
 
 @end

@@ -51,7 +51,7 @@
 - (void) ADC_immediate
 {
     pc++;
-    uint8 operand = [ram read: pc];
+    uint8 operand = [self readMemory: pc];
     pc++;
     [self debugLogWithFormat:@"ADC #$%02X", operand];
     
@@ -1473,10 +1473,11 @@
  (indirect),Y  LDA (oper),Y  B1    2     5*
  */
 /* Implementation of LDA */
+/* Implementation of LDA */
 - (void) LDA_immediate
 {
     pc++;
-    a = [ram read: pc];
+    a = [self readMemory: pc];
     pc++;
     
     [self debugLogWithFormat:@"LDA #$%02X", a];
@@ -2488,13 +2489,14 @@
  (indirect),Y  STA (oper),Y  91    2     6
  */
 /* Implementation of STA */
+/* Implementation of STA */
 - (void) STA_zeropage
 {
     pc++;
-    uint8 address = [ram read: pc];
+    uint8 address = [self readMemory: pc];
     pc++;
     
-    [ram write: a loc: address];
+    [self writeMemory: a address: address];
     [self debugLogWithFormat:@"STA $%02X", address];
     // STA does not affect any flags
 }

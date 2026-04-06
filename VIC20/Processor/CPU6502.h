@@ -8,7 +8,7 @@
 
 #import <Foundation/Foundation.h>
 
-@class RAM, ROM;
+@class RAM, ROM, VIC6561;
 
 #define ZEROPAGE    0x0000  // 0x0000 - 0x00FF
 #define STACKBASE   0x0100  // 0x0100 - 0x01FF
@@ -42,6 +42,7 @@ struct status {
     
     // Memory...
     RAM *ram;
+    VIC6561 *vic;
     NSUInteger cycles;
     BOOL debug;
     
@@ -51,6 +52,7 @@ struct status {
 
 // Initialize with memory...
 - (id) initWithSize: (NSUInteger)size;
+- (id) initWithRAM: (RAM *)memory VIC: (VIC6561 *)vicChip;
 
 // Reset/Interrupt...
 - (void) reset;
@@ -63,6 +65,10 @@ struct status {
 - (void) executeOperation: (NSNumber *)operation;
 - (void) loadProgramFile: (NSString *)fileName atLocation: (uint16)loc;
 - (void) runAtLocation: (uint16)loc;
+
+// Memory access (with VIC integration)
+- (uint8) readMemory: (uint16)address;
+- (void) writeMemory: (uint8)value address: (uint16)address;
 
 // Run...
 - (void) run;
