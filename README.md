@@ -11,6 +11,7 @@ The VIC-20 (Video Interface Chip) was an 8-bit home computer produced by Commodo
 This emulator implements a complete VIC-20 system:
 
 ### Core Hardware
+
 - **MOS 6502 CPU Emulation**: Full instruction set implementation with proper status flags, addressing modes, and cycle-accurate timing
 - **VIC-6561 Video Chip**: Complete video interface chip emulation with 16-color palette, character/bitmap modes, and hardware registers
 - **Dual VIA-6522 I/O Chips**: Versatile Interface Adapters for keyboard scanning, joystick input, user port, and cassette interface
@@ -18,6 +19,7 @@ This emulator implements a complete VIC-20 system:
 - **Memory Management System**: Comprehensive memory mapping with ROM banking, cartridge slots, and expansion memory support
 
 ### Memory Configuration  
+
 - **Base RAM**: 4KB (expandable to 22KB with memory expansion modules)
 - **ROM Support**: BASIC ROM (8KB), KERNAL ROM (8KB), Character ROM (4KB)
 - **Cartridge Support**: Auto-detecting 4KB, 8KB, and 16KB cartridges
@@ -25,6 +27,7 @@ This emulator implements a complete VIC-20 system:
 - **Memory-Mapped I/O**: Proper $9000-$912F address space for hardware registers
 
 ### System Features
+
 - **Integrated Architecture**: All components communicate through proper memory-mapped I/O and interrupt systems
 - **Debug Support**: Comprehensive debugging output with component state monitoring and execution tracing
 - **ROM Loading**: Automatic loading of VIC-20 system ROMs with fallback defaults
@@ -73,7 +76,8 @@ clang -framework Foundation -I./VIC20 VIC20Test.m VIC20/Processor/*.m VIC20/RAM/
 ```
 
 The test program validates:
-- System component initialization 
+
+- System component initialization
 - Memory management and expansion
 - Memory-mapped I/O register access  
 - CPU instruction execution
@@ -126,6 +130,7 @@ VIC20/
 The emulator implements a complete VIC-20 system with fully integrated components:
 
 ### System Integration
+
 - **CPU6502**: Acts as the main system controller, orchestrating all hardware components  
 - **VIC6561**: Video Interface Chip providing graphics rendering, color palette, and sound generation
 - **VIA6522 (×2)**: Dual I/O adapters handling keyboard matrix scanning, joystick input, and peripheral interfaces
@@ -134,6 +139,7 @@ The emulator implements a complete VIC-20 system with fully integrated component
 - **Memory-Mapped I/O**: Authentic hardware register access at $9000-$912F address space
 
 ### Memory Architecture
+
 ```
 $0000-$0FFF   Base RAM (4KB)
 $1000-$1FFF   Expansion RAM area
@@ -150,6 +156,7 @@ $E000-$FFFF   KERNAL ROM (8KB)
 ```
 
 ### Component Communication
+
 - **Interrupt System**: VIA timers generate interrupts processed by CPU
 - **Keyboard Interface**: Keyboard matrix connects through VIA1 for authentic key scanning
 - **Video System**: VIC chip provides raster timing and video memory access
@@ -195,6 +202,7 @@ CPU6502 *vic20 = [[CPU6502 alloc] init];
 ### ROM Requirements  
 
 For fully functional emulation, place these ROM files in a `roms/` directory:
+
 - `basic.rom` - VIC-20 BASIC interpreter (8KB)  
 - `kernal.rom` - VIC-20 KERNAL operating system (8KB)
 - `characters.rom` - Character generator ROM (4KB, optional)
@@ -204,6 +212,7 @@ ROM files can be obtained from the VICE emulator distribution or other legal sou
 ### Cartridge Support
 
 The emulator supports VIC-20 cartridges:
+
 - **4KB cartridges** - Mapped to $6000-$6FFF
 - **8KB cartridges** - Mapped to $2000-$3FFF or $4000-$5FFF  
 - **16KB cartridges** - Mapped across multiple areas

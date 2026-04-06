@@ -14,10 +14,12 @@ This test program demonstrates the complete VIC-20 emulator system with all inte
 ## Compilation
 
 ### Using Xcode
+
 1. Add `VIC20Test.m` to your Xcode project
 2. Build and run the project
 
 ### Using Command Line
+
 ```bash
 # Compile the test program
 clang -framework Foundation -I./VIC20 \
@@ -40,6 +42,7 @@ clang -framework Foundation -I./VIC20 \
 ## Expected Output
 
 The test will display:
+
 - Component initialization status
 - Memory configuration details  
 - Memory access test results (RAM, VIC, VIA registers)
@@ -58,6 +61,7 @@ To test with actual VIC-20 ROM files:
 3. Run the test program again
 
 ### ROM File Sources
+
 - Original VIC-20 ROMs can be found in VICE emulator distribution
 - ROM files should be 4KB or 8KB in size
 - Character ROM is optional (default character set will be used)
@@ -73,6 +77,7 @@ To test cartridge loading:
 ## Memory Configuration
 
 The test configures maximum memory expansion:
+
 - Base RAM: 4KB (0x0000-0x0FFF, minus 1KB for screen/color)  
 - 3KB Expansion: 0x0400-0x0FFF
 - 8KB Expansion 1: 0x2000-0x3FFF
@@ -82,6 +87,7 @@ The test configures maximum memory expansion:
 ## I/O Memory Map
 
 The test verifies memory-mapped I/O access:
+
 - VIC-6561 Registers: 0x9000-0x900F (video/sound)
 - VIA-6522 #1 Registers: 0x9110-0x911F (keyboard interface)
 - VIA-6522 #2 Registers: 0x9120-0x912F (user port)
@@ -89,6 +95,7 @@ The test verifies memory-mapped I/O access:
 ## Test Results
 
 Each test shows PASS/FAIL status:
+
 - **RAM Test**: Basic memory read/write
 - **VIC Test**: Video chip register access
 - **VIA1 Test**: Keyboard interface register access  
@@ -98,6 +105,7 @@ Each test shows PASS/FAIL status:
 ## Troubleshooting
 
 If tests fail:
+
 1. Check that all source files are properly included
 2. Verify memory management component initialization
 3. Review debug output for detailed error information
@@ -106,6 +114,7 @@ If tests fail:
 ## Next Steps
 
 After successful testing:
+
 1. Integrate with macOS UI for keyboard input and video output
 2. Add ROM loading interface for easy ROM file selection
 3. Implement save/load state functionality
