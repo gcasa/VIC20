@@ -451,4 +451,10 @@
     return [self readRegister:regAddr];
 }
 
+- (void)renderScanline:(NSUInteger)line {
+}
+
+- (void)updateColorPalette {
+}
+
 @end

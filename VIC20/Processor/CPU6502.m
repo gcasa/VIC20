@@ -1427,4 +1427,12 @@ static NSString *methodsString;
     NSLog(@"Total RAM: %luKB", (unsigned long)([memoryManager getTotalRAMSize] / 1024));
 }
 
+- (id)initVIC20System {
+    return nil;
+}
+
+- (id)initWithRAM:(RAM *)memory VIC:(VIC6561 *)vicChip {
+    return nil;
+}
+
 @end
