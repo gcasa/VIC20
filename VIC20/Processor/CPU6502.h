@@ -77,4 +77,9 @@ struct status {
 // Debug
 - (void)debugLogWithFormat: (NSString *)formatString,...;
 
+// Helper methods for flag calculations
+- (void) updateNZFlags: (uint8)value;
+- (void) setCarryFlag: (BOOL)carry;
+- (void) setOverflowFlag: (BOOL)overflow;
+
 @end

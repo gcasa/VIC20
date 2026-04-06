@@ -1040,17 +1040,24 @@ static NSString *methodsString;
     a  = 0x00;
     x  = 0x00;
     y  = 0x00;
-    pc = 0x00;
-    sp = 0x00;
+    
+    // Load PC from reset vector at 0xFFFC-0xFFFD
+    uint8 pcl = [ram read: RESETVECTOR];
+    uint8 pch = [ram read: RESETVECTOR + 1];
+    pc = ((uint16)pch << 8) | pcl;
+    
+    // Initialize stack pointer to 0xFF (top of stack)
+    sp = 0xFF;
     
     // Initialize flags...
     s.status.n  = 0;
     s.status.v  = 0;
     s.status.b  = 0;
     s.status.d  = 0;
-    s.status.i  = 0;
+    s.status.i  = 1;  // Interrupts disabled after reset
     s.status.z  = 0;
     s.status.c  = 0;
+    s.status.unused = 1;  // Bit 5 is always 1
 }
 
 - (void) interrupt
@@ -1062,6 +1069,7 @@ static NSString *methodsString;
 {
     uint8 opcode = [ram read: pc];
     currentInstruction = [NSNumber numberWithInt: opcode];
+    // PC will be incremented by execute methods as needed
 }
 
 - (void) runAtLocation: (uint16)loc
@@ -1085,7 +1093,8 @@ static NSString *methodsString;
 
 - (void) step
 {
-    pc++;
+    // This method is now used for single-step debugging
+    [self execute];
 }
 
 - (void) tick
@@ -1119,16 +1128,24 @@ static NSString *methodsString;
     if(opDict != nil)
     {
         NSString *methodName = [opDict objectForKey: @"methodName"];
+        NSNumber *cyclesNum = [opDict objectForKey: @"cycles"];
+        cycles += [cyclesNum integerValue];
+        
         SEL selector = NSSelectorFromString(methodName);
-        IMP imp = [self methodForSelector:selector];
-        void (*func)(id, SEL) = (void *)imp;
-        func(self, selector);
+        if([self respondsToSelector:selector]) {
+            IMP imp = [self methodForSelector:selector];
+            void (*func)(id, SEL) = (void *)imp;
+            func(self, selector);
+        } else {
+            NSLog(@"Unimplemented instruction method: %@ for OPCODE = %@ @ PC = %04X", methodName, operation, pc);
+            pc++; // Skip unknown instruction
+        }
     }
     else
     {
         NSLog(@"Illegal instruction.  OPCODE = %@ @ PC = %04X", operation, pc);
+        pc++; // Skip illegal instruction
     }
-    [self step];
 }
 
 // Load
@@ -1162,6 +1179,23 @@ static NSString *methodsString;
         sp++;
     }
     return [ram read:(STACKBASE + sp)];
+}
+
+// Helper methods for flag calculations
+- (void) updateNZFlags: (uint8)value
+{
+    s.status.n = (value & 0x80) ? 1 : 0;
+    s.status.z = (value == 0) ? 1 : 0;
+}
+
+- (void) setCarryFlag: (BOOL)carry
+{
+    s.status.c = carry ? 1 : 0;
+}
+
+- (void) setOverflowFlag: (BOOL)overflow
+{
+    s.status.v = overflow ? 1 : 0;
 }
 
 @end

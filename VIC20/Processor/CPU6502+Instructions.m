@@ -51,38 +51,71 @@
 - (void) ADC_immediate
 {
     pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"%04x ADC #%02x",pc - 1, param1];
-    a = a + param1;
-    s.status.c = a & 0x80;
-    s.status.n = a & 0x80;
-    s.status.z = !(a);
+    uint8 operand = [ram read: pc];
+    pc++;
+    [self debugLogWithFormat:@"ADC #$%02X", operand];
+    
+    uint16 result = (uint16)a + (uint16)operand + (uint16)s.status.c;
+    
+    // Set overflow flag: (A^result) & (operand^result) & 0x80
+    s.status.v = ((a ^ result) & (operand ^ result) & 0x80) ? 1 : 0;
+    
+    // Set carry flag if result > 255
+    s.status.c = (result > 0xFF) ? 1 : 0;
+    
+    a = result & 0xFF;
+    
+    // Update N and Z flags
+    s.status.n = (a & 0x80) ? 1 : 0;
+    s.status.z = (a == 0) ? 1 : 0;
 }
 
 /* Implementation of ADC */
 - (void) ADC_zeropage
 {
     pc++;
-    uint8 param1 = [ram read: pc];
-    uint8 val = [ram read: param1];
-    [self debugLogWithFormat:@"ADC $%02X", param1];
-    a = a + val;
-    s.status.c = a & 0x80;
-    s.status.n = a & 0x80;
-    s.status.z = !(a);
+    uint8 address = [ram read: pc];
+    pc++;
+    uint8 operand = [ram read: address];
+    [self debugLogWithFormat:@"ADC $%02X", address];
+    
+    uint16 result = (uint16)a + (uint16)operand + (uint16)s.status.c;
+    
+    // Set overflow flag: (A^result) & (operand^result) & 0x80
+    s.status.v = ((a ^ result) & (operand ^ result) & 0x80) ? 1 : 0;
+    
+    // Set carry flag if result > 255
+    s.status.c = (result > 0xFF) ? 1 : 0;
+    
+    a = result & 0xFF;
+    
+    // Update N and Z flags
+    s.status.n = (a & 0x80) ? 1 : 0;
+    s.status.z = (a == 0) ? 1 : 0;
 }
 
 /* Implementation of ADC */
 - (void) ADC_zeropageX
 {
     pc++;
-    uint8 param1 = [ram read: pc];
-    uint8 val = [ram read: param1 + x];
-    [self debugLogWithFormat:@"ADC ($%02X),X", param1];
-    a = a + val;
-    s.status.c = a & 0x80;
-    s.status.n = a & 0x80;
-    s.status.z = !(a);
+    uint8 address = [ram read: pc];
+    pc++;
+    uint8 operand = [ram read: (address + x) & 0xFF];  // Zero page wraps around
+    [self debugLogWithFormat:@"ADC $%02X,X", address];
+    
+    uint16 result = (uint16)a + (uint16)operand + (uint16)s.status.c;
+    
+    // Set overflow flag: (A^result) & (operand^result) & 0x80
+    s.status.v = ((a ^ result) & (operand ^ result) & 0x80) ? 1 : 0;
+    
+    // Set carry flag if result > 255
+    s.status.c = (result > 0xFF) ? 1 : 0;
+    
+    a = result & 0xFF;
+    
+    // Update N and Z flags
+    s.status.n = (a & 0x80) ? 1 : 0;
+    s.status.z = (a == 0) ? 1 : 0;
 }
 
 /* Implementation of ADC */
@@ -154,17 +187,34 @@
 /* Implementation of ADC */
 - (void) ADC_indirectY
 {
-    [self debugLogWithFormat:@"ADC"];
     pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
-    uint8 p2 = param1 + y + 1;
-    uint16 addr = ((uint16)p2 << 8) + (uint16)param1;
-    uint8 val = [ram read: addr];
-    a = a + val;
-    s.status.c = a & 0x80;
-    s.status.n = a & 0x80;
-    s.status.z = !(a);
+    uint8 zpAddr = [ram read: pc];
+    pc++;
+    
+    // Read 16-bit address from zero page
+    uint8 addrLo = [ram read: zpAddr];
+    uint8 addrHi = [ram read: (zpAddr + 1) & 0xFF];  // Zero page wraps
+    uint16 baseAddr = ((uint16)addrHi << 8) | addrLo;
+    
+    // Add Y to the address
+    uint16 finalAddr = baseAddr + y;
+    uint8 operand = [ram read: finalAddr];
+    
+    [self debugLogWithFormat:@"ADC ($%02X),Y", zpAddr];
+    
+    uint16 result = (uint16)a + (uint16)operand + (uint16)s.status.c;
+    
+    // Set overflow flag: (A^result) & (operand^result) & 0x80
+    s.status.v = ((a ^ result) & (operand ^ result) & 0x80) ? 1 : 0;
+    
+    // Set carry flag if result > 255
+    s.status.c = (result > 0xFF) ? 1 : 0;
+    
+    a = result & 0xFF;
+    
+    // Update N and Z flags
+    s.status.n = (a & 0x80) ? 1 : 0;
+    s.status.z = (a == 0) ? 1 : 0;
 }
 
 /* Implementation of AND */
@@ -185,15 +235,20 @@
  (indirect,X)  AND (oper,X)  21    2     6
  (indirect),Y  AND (oper),Y  31    2     5*
  */
+/* Implementation of AND */
 - (void) AND_immediate
 {
-    [self debugLogWithFormat:@"AND"];
     pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
-    a = a & param1;
-    s.status.n = a & 0x80;
-    s.status.z = !(a);
+    uint8 operand = [ram read: pc];
+    pc++;
+    [self debugLogWithFormat:@"AND #$%02X", operand];
+    
+    a = a & operand;
+    
+    // Update N and Z flags
+    s.status.n = (a & 0x80) ? 1 : 0;
+    s.status.z = (a == 0) ? 1 : 0;
+    // Carry flag is not affected by AND
 }
 
 /* Implementation of AND */
@@ -414,14 +469,18 @@
 /* Implementation of BEQ */
 - (void) BEQ_relative
 {
-    [self debugLogWithFormat:@"BEQ"];
     pc++;
-    int8_t param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    int8_t offset = (int8_t)[ram read: pc];
+    pc++;  // Move past the offset byte
+    
+    [self debugLogWithFormat:@"BEQ $%02X (offset: %d)", pc + offset, offset];
+    
     if(s.status.z)
     {
-        pc += param1;
+        pc += offset;  // Branch taken
+        // TODO: Add cycle penalty for page crossing
     }
+    // If branch not taken, PC is already at next instruction
 }
 
 /*
@@ -1337,16 +1396,17 @@
 /* Implementation of JMP */
 - (void) JMP_absolute
 {
-    [self debugLogWithFormat:@"JMP"];
     pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param1];
+    uint8 addrLo = [ram read: pc];
     pc++;
-    uint8 param2 = [ram read: pc];
-    [self debugLogWithFormat:@"param = %X", param2];
-    uint16 addr = ((uint16)param2 << 8) + (uint16)param1;
-    [self debugLogWithFormat:@"addr = %X", addr];
-    pc = addr;
+    uint8 addrHi = [ram read: pc];
+    
+    uint16 jumpAddr = ((uint16)addrHi << 8) | addrLo;
+    
+    [self debugLogWithFormat:@"JMP $%04X", jumpAddr];
+    
+    pc = jumpAddr;
+    // JMP does not affect any flags
 }
 
 /* Implementation of JMP */
@@ -1416,11 +1476,14 @@
 - (void) LDA_immediate
 {
     pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"LDA #%X", param1];
-    a = param1;
-    s.status.n = a & 0x80;
-    s.status.z = !(a);
+    a = [ram read: pc];
+    pc++;
+    
+    [self debugLogWithFormat:@"LDA #$%02X", a];
+    
+    // Update N and Z flags
+    s.status.n = (a & 0x80) ? 1 : 0;
+    s.status.z = (a == 0) ? 1 : 0;
 }
 
 /* Implementation of LDA */
@@ -2428,9 +2491,12 @@
 - (void) STA_zeropage
 {
     pc++;
-    uint8 param1 = [ram read: pc];
-    [self debugLogWithFormat:@"STA #%02x", param1];
-    [ram write:a loc:param1];
+    uint8 address = [ram read: pc];
+    pc++;
+    
+    [ram write: a loc: address];
+    [self debugLogWithFormat:@"STA $%02X", address];
+    // STA does not affect any flags
 }
 
 /* Implementation of STA */
