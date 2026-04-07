@@ -1,6 +1,6 @@
 # VIC-20 Emulator
 
-A VIC-20 computer emulator written in Objective-C for macOS.
+A VIC-20 computer emulator written in Objective-C for macOS.   This is BY NO MEANS meant as a replacement for VICE or anything like that.   This is an educational exercise to help me understand how to write an emulator.
 
 ## About the VIC-20
 
