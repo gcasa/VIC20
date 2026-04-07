@@ -2663,6 +2663,10 @@
 {
     [self debugLogWithFormat:@"TAX"];
     x = a;
+    
+    // Update N and Z flags based on the result
+    s.status.n = (x & 0x80) ? 1 : 0;  // Set N flag if bit 7 is set
+    s.status.z = (x == 0) ? 1 : 0;    // Set Z flag if result is zero
 }
 
 /*
@@ -2680,6 +2684,10 @@
 {
     [self debugLogWithFormat:@"TAY"];
     y = a;
+    
+    // Update N and Z flags based on the result
+    s.status.n = (y & 0x80) ? 1 : 0;  // Set N flag if bit 7 is set
+    s.status.z = (y == 0) ? 1 : 0;    // Set Z flag if result is zero
 }
 
 /*
@@ -2697,6 +2705,10 @@
 {
     [self debugLogWithFormat:@"TSX"];
     x = sp;
+    
+    // Update N and Z flags based on the result
+    s.status.n = (x & 0x80) ? 1 : 0;  // Set N flag if bit 7 is set
+    s.status.z = (x == 0) ? 1 : 0;    // Set Z flag if result is zero
 }
 
 /*
@@ -2714,6 +2726,10 @@
 {
     [self debugLogWithFormat:@"TXA"];
     a = x;
+    
+    // Update N and Z flags based on the result
+    s.status.n = (a & 0x80) ? 1 : 0;  // Set N flag if bit 7 is set
+    s.status.z = (a == 0) ? 1 : 0;    // Set Z flag if result is zero
 }
 
 /*
@@ -2747,5 +2763,11 @@
 - (void) TYA_implied
 {
     [self debugLogWithFormat:@"TYA"];
-    y = a;
-}@end
+    a = y;  // Transfer Y to A, not A to Y
+    
+    // Update N and Z flags based on the result
+    s.status.n = (a & 0x80) ? 1 : 0;  // Set N flag if bit 7 is set
+    s.status.z = (a == 0) ? 1 : 0;    // Set Z flag if result is zero
+}
+
+@end

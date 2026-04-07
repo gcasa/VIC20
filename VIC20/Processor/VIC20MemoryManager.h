@@ -8,6 +8,14 @@
 
 #import <Foundation/Foundation.h>
 
+// Type definitions for GNUstep compatibility 
+#ifndef VIC20_UINT_TYPES_DEFINED
+#define VIC20_UINT_TYPES_DEFINED
+typedef unsigned char uint8;
+typedef unsigned short uint16;
+typedef unsigned int uint32;
+#endif
+
 @class VIC6561, VIA6522, KeyboardMatrix;
 
 // Memory regions

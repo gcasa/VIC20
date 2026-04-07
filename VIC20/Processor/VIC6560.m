@@ -451,10 +451,115 @@
     return [self readRegister:regAddr];
 }
 
-- (void)renderScanline:(NSUInteger)line {
+- (void)renderScanline:(NSUInteger)line 
+{
+    if (!displayBuffer || line >= VIC_SCREEN_HEIGHT_PIXELS) {
+        return;
+    }
+    
+    // Get bitmap data and calculate scanline offset
+    unsigned char *bitmapData = [displayBuffer bitmapData];
+    NSInteger bytesPerRow = [displayBuffer bytesPerRow];
+    unsigned char *scanlineData = bitmapData + line * bytesPerRow;
+    
+    // Get background color
+    uint8 backgroundColor = registers[VIC_REG_SCREEN_COLOR] & 0x0F;
+    NSColor *bgColor = colorPalette[backgroundColor];
+    
+    CGFloat bgRed, bgGreen, bgBlue, bgAlpha;
+    [bgColor getRed:&bgRed green:&bgGreen blue:&bgBlue alpha:&bgAlpha];
+    
+    // Fill scanline with background color initially
+    for (int x = 0; x < VIC_SCREEN_WIDTH_PIXELS; x++) {
+        unsigned char *pixel = scanlineData + x * 3;
+        pixel[0] = (unsigned char)(bgRed * 255);
+        pixel[1] = (unsigned char)(bgGreen * 255);
+        pixel[2] = (unsigned char)(bgBlue * 255);
+    }
+    
+    // Determine which character row this scanline belongs to
+    int charRow = line / VIC_CHAR_HEIGHT_PIXELS;
+    int charScanline = line % VIC_CHAR_HEIGHT_PIXELS;
+    
+    // Handle double height mode
+    if (doubleHeight) {
+        charRow = line / (VIC_CHAR_HEIGHT_PIXELS * 2);
+        charScanline = (line % (VIC_CHAR_HEIGHT_PIXELS * 2)) / 2;
+    }
+    
+    // Only render if we're within the visible screen area
+    if (charRow >= screenRows) {
+        return;
+    }
+    
+    // Render characters on this scanline
+    for (int col = 0; col < screenColumns && col < VIC_SCREEN_WIDTH_CHARS; col++) {
+        // Get character code from screen matrix
+        uint16 screenOffset = charRow * screenColumns + col;
+        uint8 charCode = [self readVideoMatrix:screenOffset];
+        
+        // Get color from color matrix
+        uint8 colorCode = [self readColorMatrix:screenOffset] & 0x0F;
+        NSColor *charColor = colorPalette[colorCode];
+        
+        // Get character bitmap line from character ROM
+        uint16 charROMOffset = charCode * 8 + charScanline;
+        uint8 charLine = [self readCharacterROM:charROMOffset];
+        
+        CGFloat red, green, blue, alpha;
+        [charColor getRed:&red green:&green blue:&blue alpha:&alpha];
+        
+        // Render this character's scanline
+        for (int charCol = 0; charCol < VIC_CHAR_WIDTH_PIXELS; charCol++) {
+            if (charLine & (0x80 >> charCol)) {  // Pixel is set
+                int pixelX = col * VIC_CHAR_WIDTH_PIXELS + charCol;
+                
+                if (pixelX < VIC_SCREEN_WIDTH_PIXELS) {
+                    unsigned char *pixel = scanlineData + pixelX * 3;
+                    pixel[0] = (unsigned char)(red * 255);
+                    pixel[1] = (unsigned char)(green * 255);
+                    pixel[2] = (unsigned char)(blue * 255);
+                }
+            }
+        }
+    }
 }
 
-- (void)updateColorPalette {
+- (void)updateColorPalette 
+{
+    // The VIC-20 has a fixed 16-color palette, but the auxiliary color
+    // can be modified through the volume/color register
+    uint8 auxiliaryColor = (registers[VIC_REG_VOLUME_COLOR] >> 4) & 0x0F;
+    
+    // Store the original auxiliary color (this would typically be used
+    // for border color or special graphics modes)
+    auxiliaryColorIndex = auxiliaryColor;
+    
+    // In some VIC-20 configurations, certain colors can be modified
+    // through register settings. For standard VIC-20, the palette is fixed,
+    // but we maintain this method for potential enhancement or different
+    // VIC chip variants.
+    
+    // The screen color register also affects the color output
+    uint8 screenColor = registers[VIC_REG_SCREEN_COLOR] & 0x0F;
+    
+    // Validate color indices to prevent array bounds issues
+    if (auxiliaryColor >= 16) auxiliaryColor = 0;
+    if (screenColor >= 16) screenColor = 0;
+    
+    // For debugging purposes, log significant color changes
+    static uint8 lastScreenColor = 0xFF;
+    static uint8 lastAuxColor = 0xFF;
+    
+    if (screenColor != lastScreenColor || auxiliaryColor != lastAuxColor) {
+        NSLog(@"VIC Color Update - Screen: %d, Auxiliary: %d", screenColor, auxiliaryColor);
+        lastScreenColor = screenColor;
+        lastAuxColor = auxiliaryColor;
+    }
+    
+    // The actual palette remains the same, but this method could be extended
+    // to support palette modifications in enhanced VIC chip variants or
+    // to handle color temperature adjustments, gamma correction, etc.
 }
 
 @end

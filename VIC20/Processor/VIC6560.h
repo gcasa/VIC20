@@ -9,6 +9,14 @@
 #import <Foundation/Foundation.h>
 #import <Cocoa/Cocoa.h>
 
+// Type definitions for GNUstep compatibility 
+#ifndef VIC20_UINT_TYPES_DEFINED
+#define VIC20_UINT_TYPES_DEFINED
+typedef unsigned char uint8;
+typedef unsigned short uint16;
+typedef unsigned int uint32;
+#endif
+
 @class RAM;
 
 // VIC-6561 Register addresses (relative to VIC base)
@@ -101,6 +109,7 @@
     uint8 screenColumns;
     uint8 screenRows;
     BOOL doubleHeight;
+    uint8 auxiliaryColorIndex;  // Current auxiliary color index
 }
 
 // Initialization
