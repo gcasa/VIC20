@@ -8,7 +8,9 @@
 
 #import "VIC6560.h"
 #import "RAM.h"
+#ifndef GNUSTEP
 #import <AudioToolbox/AudioToolbox.h>
+#endif
 
 @implementation VIC6561
 

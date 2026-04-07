@@ -84,7 +84,7 @@ typedef enum {
     NSUInteger cycles;
     
     // CPU reference for interrupts
-    __weak CPU6502 *cpu;
+    CPU6502 *cpu; // weak
     
     // Device identification
     NSString *deviceName;

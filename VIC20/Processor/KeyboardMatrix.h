@@ -35,8 +35,8 @@ typedef unsigned int uint32;
     BOOL keyMatrix[VIC_KEY_ROWS][VIC_KEY_COLS];
     
     // VIA chip references for matrix scanning
-    __weak VIA6522 *via1;
-    __weak VIA6522 *via2;
+    VIA6522 *via1; // weak
+    VIA6522 *via2; // weak
     
     // Current scan state
     uint8 currentRow;
