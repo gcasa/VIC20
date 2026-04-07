@@ -303,11 +303,17 @@
         unichar character = [text characterAtIndex:i];
         [self pressKey:character];
         
-        // Small delay for timing (could be improved with proper timing)
-        dispatch_after(dispatch_time(DISPATCH_TIME_NOW, (int64_t)(0.05 * NSEC_PER_SEC)), dispatch_get_main_queue(), ^{
-            [self releaseKey:character];
-        });
+        // Small delay for timing using performSelector instead of GCD
+        [self performSelector:@selector(releaseKeyForCharacter:) 
+                   withObject:@(character) 
+                   afterDelay:0.05];
     }
+}
+
+- (void)releaseKeyForCharacter:(NSNumber *)characterNumber
+{
+    unichar character = [characterNumber unsignedShortValue];
+    [self releaseKey:character];
 }
 
 #pragma mark - Debug
