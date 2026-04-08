@@ -9,10 +9,24 @@
 #import <Cocoa/Cocoa.h>
 
 @class CPU6502;
+@class VIC6561;
+@class VIC20DisplayView;
+@class RAM;
 
 @interface AppDelegate : NSObject <NSApplicationDelegate>
 {
     CPU6502 *cpu;
+    VIC6561 *vicChip;
+    VIC20DisplayView *displayView;
+    RAM *systemRAM;
 }
+
+@property (weak) IBOutlet NSWindow *window;
+
+// Display management
+- (void)setupDisplay;
+- (void)startEmulation;
+- (void)stopEmulation;
+
 @end
 
