@@ -14,6 +14,10 @@
 #import "KeyboardMatrix.h"
 #import "VIC20MemoryManager.h"
 
+static NSMutableDictionary *instructionMap;
+static NSMutableArray *opCodes;
+static NSString *methodsString;
+
 @implementation CPU6502
 
 /*  
@@ -39,10 +43,6 @@ CPU INSTRUCTION TABLE
  F0    BEQ rel     SBC ind,Y   ---    ---    ---       SBC zpg,X  INC zpg,X  ---  SED impl SBC abs,Y  ---      ---  ---       SBC abs,X   INC abs,X  ---
 ----
  */
-
-static NSMutableDictionary *instructionMap;
-static NSMutableArray *opCodes;
-static NSString *methodsString;
 
 + (NSDictionary *)buildDictForInstructionName: (NSString *)name
                                     paramters: (NSNumber *)parameters
