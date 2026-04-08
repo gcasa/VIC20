@@ -245,6 +245,9 @@ This project is licensed under the GNU General Public License v3.0 - see the [LI
 - Commodore International for creating the original VIC-20 computer
 - The retro computing community for preserving VIC-20 documentation and resources
 
+## Icon
+<img width="1024" height="1024" alt="vic20" src="https://github.com/user-attachments/assets/2a0ba9d3-2eae-4129-bea2-c2634d8bc14c" />
+
 ---
 
-*Bringing the classic VIC-20 computing experience to modern macOS systems.*
+*Bringing the classic VIC-20 computing experience to modern macOS systems for educational experience.*
