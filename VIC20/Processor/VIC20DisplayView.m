@@ -42,11 +42,11 @@
     [self calculateDisplayRect];
     
     // Set up view properties
-    [self setWantsLayer:YES];
-    self.layer.backgroundColor = [[NSColor blackColor] CGColor];
+    // [self setWantsLayer:YES];
+    // self.layer.backgroundColor = [[NSColor blackColor] CGColor];
     
     // Enable layer-backed rendering for better performance
-    self.layerContentsRedrawPolicy = NSViewLayerContentsRedrawOnSetNeedsDisplay;
+    // self.layerContentsRedrawPolicy = NSViewLayerContentsRedrawOnSetNeedsDisplay;
 }
 
 - (void)dealloc
@@ -160,10 +160,8 @@
     [displayImage drawInRect:displayRect
                     fromRect:NSZeroRect
                    operation:NSCompositingOperationSourceOver
-                    fraction:1.0
-              respectFlipped:YES
-                       hints:@{NSImageHintInterpolation: @(NSImageInterpolationNone)}];
-    
+                    fraction:1.0];
+
     // Draw border if display doesn't fill the entire view
     if (!NSEqualRects(displayRect, self.bounds)) {
         [[NSColor darkGrayColor] setStroke];
