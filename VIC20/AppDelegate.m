@@ -39,7 +39,7 @@
     // Initialize VIC chip with system RAM
     vicChip = [[VIC6561 alloc] initWithRAM:systemRAM];
     
-    // Initialize CPU with system size
+    // Initialize CPU with system RAM and VIC chip
     cpu = [[CPU6502 alloc] initWithRAM: systemRAM VIC:vicChip];
 
     // Load character ROM data into VIC chip
