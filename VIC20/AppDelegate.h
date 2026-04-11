@@ -21,7 +21,7 @@
     RAM *systemRAM;
 }
 
-@property (weak) IBOutlet NSWindow *window;
+@property IBOutlet NSWindow *window;
 
 // Display management
 - (void)setupDisplay;
