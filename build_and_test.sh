@@ -58,7 +58,7 @@ compile_test() {
         "VIC20/RAM/Memory.m"
         "VIC20/RAM/RAM.m"
         "VIC20/RAM/ROM.m"
-        "VIC20/RAM/VIC20MemoryManager.m"
+        "VIC20/Processor/VIC20MemoryManager.m"
     )
     
     echo "Checking required source files..."
@@ -77,20 +77,43 @@ compile_test() {
     fi
     
     # Compile command
-    print_status "Running clang compiler..."
+    print_status "Running compiler..."
     
-    clang -framework Foundation -I./VIC20 \
-        VIC20Test.m \
-        VIC20/Processor/CPU6502.m \
-        VIC20/Processor/CPU6502+Instructions.m \
-        VIC20/Processor/VIC6560.m \
-        VIC20/Processor/VIA6522.m \
-        VIC20/Processor/KeyboardMatrix.m \
-        VIC20/RAM/Memory.m \
-        VIC20/RAM/RAM.m \
-        VIC20/RAM/ROM.m \
-        VIC20/RAM/VIC20MemoryManager.m \
-        -o VIC20Test
+    # Detect platform and use appropriate build flags
+    if command -v gnustep-config &> /dev/null; then
+        # GNUstep on Linux
+        print_status "Building for GNUstep/Linux..."
+        gcc -DGNUSTEP=1 \
+            $(gnustep-config --objc-flags) \
+            -I./VIC20 \
+            VIC20Test.m \
+            VIC20/Processor/CPU6502.m \
+            VIC20/Processor/CPU6502+Instructions.m \
+            VIC20/Processor/VIC6560.m \
+            VIC20/Processor/VIA6522.m \
+            VIC20/Processor/KeyboardMatrix.m \
+            VIC20/RAM/Memory.m \
+            VIC20/RAM/RAM.m \
+            VIC20/RAM/ROM.m \
+            VIC20/Processor/VIC20MemoryManager.m \
+            $(gnustep-config --objc-libs) \
+            -o VIC20Test
+    else
+        # macOS with Foundation framework
+        print_status "Building for macOS..."
+        clang -framework Foundation -I./VIC20 \
+            VIC20Test.m \
+            VIC20/Processor/CPU6502.m \
+            VIC20/Processor/CPU6502+Instructions.m \
+            VIC20/Processor/VIC6560.m \
+            VIC20/Processor/VIA6522.m \
+            VIC20/Processor/KeyboardMatrix.m \
+            VIC20/RAM/Memory.m \
+            VIC20/RAM/RAM.m \
+            VIC20/RAM/ROM.m \
+            VIC20/Processor/VIC20MemoryManager.m \
+            -o VIC20Test
+    fi
     
     if [ $? -eq 0 ]; then
         print_success "Compilation successful! Executable created: VIC20Test"
