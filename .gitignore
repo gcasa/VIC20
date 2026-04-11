@@ -9,3 +9,4 @@ build
 *.xcconfig
 *.xcuserstate
 xcuserdata
+*.rom

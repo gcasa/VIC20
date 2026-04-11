@@ -34,14 +34,14 @@
 - (void)setupSystemComponents
 {
     // Create system RAM (64K)
-    systemRAM = [[RAM alloc] init];
+    systemRAM = [[RAM alloc] initWithSize:64*1024];
     
     // Initialize VIC chip with system RAM
     vicChip = [[VIC6561 alloc] initWithRAM:systemRAM];
     
     // Initialize CPU with system size
-    cpu = [[CPU6502 alloc] initWithSize:64*1024];
-    
+    cpu = [[CPU6502 alloc] initWithRAM: systemRAM VIC:vicChip];
+
     // Load character ROM data into VIC chip
     [vicChip loadDefaultCharacterSet];
     
